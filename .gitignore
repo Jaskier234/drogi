@@ -1,3 +1,5 @@
 rzeczy.txt
 .idea/*
 cmake-build-debug/*
+release/*
+test/*
