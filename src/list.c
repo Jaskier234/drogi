@@ -13,6 +13,7 @@ List *newList()
 
     list->begin = beginElem;
     list->end = endElem;
+    list->size = 0;
 
     return list;
 }
@@ -49,6 +50,7 @@ bool listInsert(Element *elem, void *value)
     newElem->prev = elem;
 
     newElem->value = value;
+
 
     return true;
 }

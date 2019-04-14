@@ -12,6 +12,7 @@ typedef struct Element
 typedef struct List
 {
     Element *begin, *end;
+    int size;
 } List;
 
 List *newList(void);

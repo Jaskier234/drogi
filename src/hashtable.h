@@ -10,11 +10,11 @@ Hashtable *newHashtable(void);
 void deleteHashtable(Hashtable *self);
 
 // TODO zmienić typ key, value na ogólny
-// TODO czy self to na pewno dobry pomysł?
+// TODO czy self to na pewno dobry pomysł? Nie zmienić, na inne
 
 // zwraca false jeśli nie uda się dodać
-bool insert(Hashtable *self, char *key, char *value);
+bool hashtableInsert(Hashtable *self, char *key, void *value);
 
-char *get(Hashtable *self, char *key);
+void *get(Hashtable *self, char *key);
 
 #endif //DROGI_HASHTABLE_H
