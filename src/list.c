@@ -39,7 +39,9 @@ bool listInsert(Element *elem, void *value)
 {
     // TODO ewentualnie zaimplementować moduł do zarządznia pamiecią
     Element *newElem = calloc(1, sizeof(Element));
-    // TODO sprawdzanie czy się udało
+
+    if(newElem == NULL)
+        return false;
 
     Element *next = elem->next;
 
@@ -53,4 +55,24 @@ bool listInsert(Element *elem, void *value)
 
 
     return true;
+}
+
+int listSize(List *list)
+{
+    if(list == NULL)
+        return 0;
+
+    int size = 0;
+    Element *e = list->begin->next;
+    while(e->next != NULL)
+    {
+        e = e->next;
+        size++;
+    }
+    return size;
+}
+
+bool listPushBack(List *list, void *value)
+{
+    return listInsert(list->end->prev, value);
 }
