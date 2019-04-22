@@ -2,6 +2,7 @@
 #define DROGI_LIST_H
 
 #include <stdbool.h>
+#include "memory.h"
 
 typedef struct Element
 {
@@ -15,18 +16,18 @@ typedef struct List
     int size;
 } List;
 
-List *newList(void);
+List *newList(Memory *memory);
 
 void deleteList(List *list);
 
 // wstawia element do listy po elem
-bool listInsert(Element *elem, void *value);
+bool listInsert(Element *elem, void *value, Memory *memory);
 
-bool listPushBack(List *list, void *value);
+bool listPushBack(List *list, void *value, Memory *memory);
 
 // O(n)
 int listSize(List *list);
 
-// TODO możnaby dodać funkcję getElementValue
+// TODO ew. dodać funkcję getElementValue
 
 #endif //DROGI_LIST_H

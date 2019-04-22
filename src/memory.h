@@ -9,4 +9,6 @@ Memory *newMemory();
 
 void *getMemory(Memory *memory, size_t size);
 
+void deleteMemory(Memory *memory);
+
 #endif //DROGI_MEMORY_H

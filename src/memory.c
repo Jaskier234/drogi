@@ -42,3 +42,12 @@ void *getMemory(Memory *memory, size_t size)
     memory->filled += size;
     return &memory->content[memory->currentIndex][memory->filled-size];
 }
+
+void deleteMemory(Memory *memory)
+{
+    for(int i=0; i<30; i++)
+        free(memory->content[i]);
+
+    free(memory->content);
+    free(memory);
+}

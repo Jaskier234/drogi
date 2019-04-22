@@ -1,15 +1,17 @@
 #include "list.h"
+#include "memory.h"
 
 #include <stdlib.h>
 
-List *newList()
+List *newList(Memory *memory)
 {
-    List *list = calloc(1, sizeof(List));
-    Element *beginElem = calloc(1, sizeof(Element));
-    Element *endElem = calloc(1, sizeof(Element));
+    List *list = getMemory(memory, sizeof(List));
+    Element *beginElem = getMemory(memory, sizeof(Element));
+    Element *endElem = getMemory(memory, sizeof(Element));
 
     beginElem->next = endElem;
     endElem->prev = beginElem;
+
 
     list->begin = beginElem;
     list->end = endElem;
@@ -18,27 +20,30 @@ List *newList()
     return list;
 }
 
+// pamięć pod wskaźnikiem przekazanym do listy zostanie zwolniona
 void deleteList(List *list)
 {
-    Element *iter = list->begin;
+//    Element *iter = list->begin;
 
-    // zakłada, że struktura pod value jest zwolniona
-    while(iter != list->end)
-    {
-        Element *next = iter->next;
-        // free(iter->value); użytkownik powinien zwolnić wszystkie pola value przed wywołaniem deleteList()
-        free(iter);
-        iter = next;
-    }
-    free(list->end);
+//    do
+//    {
+//        Element *next = iter->next;
+//        // free(iter->value);
+//        free(iter);
+//        iter = next;
+//    }
+//    while(iter != list->end);
+
+    // free(list->end); chyba już nie potrzebne
+    //reszta zostanie zwolniona przy usuwaniu obiektu memory
 
     free(list);
 }
 
-bool listInsert(Element *elem, void *value)
+bool listInsert(Element *elem, void *value, Memory *memory)
 {
-    // TODO ewentualnie zaimplementować moduł do zarządznia pamiecią
-    Element *newElem = calloc(1, sizeof(Element));
+    // TODO ew. zaimplementować moduł do zarządznia pamiecią
+    Element *newElem = getMemory(memory, sizeof(Element)); // calloc(1, sizeof(Element));
 
     if(newElem == NULL)
         return false;
@@ -72,7 +77,7 @@ int listSize(List *list)
     return size;
 }
 
-bool listPushBack(List *list, void *value)
+bool listPushBack(List *list, void *value, Memory *memory)
 {
-    return listInsert(list->end->prev, value);
+    return listInsert(list->end->prev, value, memory);
 }
