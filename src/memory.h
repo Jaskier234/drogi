@@ -1,17 +1,12 @@
 #ifndef DROGI_MEMORY_H
 #define DROGI_MEMORY_H
 
-#include "list.h"
+#include <stddef.h>
 
-typedef struct Memory
-{
-    Element **content; // TODO lepsza nazwa
-    int size;
-    int filled;
-} Memory;
+typedef struct Memory Memory;
 
 Memory *newMemory();
 
-Element *getMemory(Memory *memory);
+void *getMemory(Memory *memory, size_t size);
 
 #endif //DROGI_MEMORY_H
