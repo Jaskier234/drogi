@@ -48,6 +48,20 @@ Hashtable **newHashtable(int size, Memory *memory)
 
 void deleteHashtableContent(Hashtable **hash)
 {
+//    for(int i=0; i<(*hash)->MOD; i++)
+//    {
+//        if((*hash)->table[i] != NULL)
+//        {
+//            Element *elem = (*hash)->table[i]->begin->next;
+//            while(elem != (*hash)->table[i]->end)
+//            {
+//                free(((HashElem*)elem->value)->key);
+//                free(((HashElem*)elem->value)->value);
+//
+//                elem = elem->next;
+//            }
+//        }
+//    }
     deleteMemory((*hash)->memory);
     free((*hash)->table);
     free(*hash);
@@ -86,13 +100,11 @@ bool changeSize(Hashtable **hash, int newSize)
             }
         }
     }
-    // TODO usunąć starą hashtablicę
     (*newHash)->filled = (*hash)->filled;
 
     deleteHashtableContent(hash);
 
     *hash = *newHash;
-    // TODO zwolnić niepotrzebne rzeczy spod z newHash
 
     free(newHash);
 
@@ -100,9 +112,8 @@ bool changeSize(Hashtable **hash, int newSize)
     return true;
 }
 
-long long hash(char *string)// TODO ew. zmienić sygnaturę
+long long hash(char *string)
 {
-    // TODO zmienić typy na long long
     const long long MOD = 1e9+7;
 
     long long hashValue = 0;
