@@ -19,21 +19,23 @@ typedef struct Egde
 
 typedef struct Graph
 {
-    Hashtable **labels;
+//    Hashtable **labels;
     Node **nodeTable;
     int nodeCount;
 } Graph;
 
 Graph *newGraph();
 
-int addNode(Graph *graph, char *label);
+void deleteGraph(Graph *graph);
 
-bool addEdge(Graph *graph, char *label1, char *label2, int length, int builtYear);
+int * addNode(Graph *graph);
 
-bool isInGraph(Graph *graph, char *label);
+bool addEdge(Graph *graph, int v1, int v2, int length, int builtYear);
 
-Edge *getEdge(Graph *graph, char *label1, char *label2);
+bool isInGraph(Graph *graph, int v);
 
-void removeEdge(Graph *graph, char *label1, char *label2);
+Edge *getEdge(Graph *graph, int v1, int v2);
+
+void removeEdge(Graph *graph, int v1, int v2);
 
 #endif //DROGI_GRAPH_H
