@@ -23,11 +23,11 @@ void deleteList(List *list);
 // wstawia element do listy po elem
 bool listInsert(Element *elem, void *value, Memory *memory);
 
+bool listRemove(Element *elem);
+
 bool listPushBack(List *list, void *value, Memory *memory);
 
 // O(n)
 int listSize(List *list);
-
-// TODO ew. dodać funkcję getElementValue
 
 #endif //DROGI_LIST_H

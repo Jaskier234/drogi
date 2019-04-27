@@ -5,9 +5,22 @@
 
 List *newList(Memory *memory)
 {
-    List *list = getMemory(memory, sizeof(List));
-    Element *beginElem = getMemory(memory, sizeof(Element));
-    Element *endElem = getMemory(memory, sizeof(Element));
+    List *list;
+    Element *beginElem;
+    Element *endElem;
+
+    if(memory == NULL)
+    {
+        list = calloc(1, sizeof(List));
+        beginElem = calloc(1, sizeof(Element));
+        endElem = calloc(1, sizeof(Element));
+    }
+    else
+    {
+        list = getMemory(memory, sizeof(List));
+        beginElem = getMemory(memory, sizeof(Element));
+        endElem = getMemory(memory, sizeof(Element));
+    }
 
     beginElem->next = endElem;
     endElem->prev = beginElem;
@@ -23,18 +36,18 @@ List *newList(Memory *memory)
 // pamięć pod wskaźnikiem przekazanym do listy zostanie zwolniona
 void deleteList(List *list)
 {
-//    Element *iter = list->begin;
+    Element *iter = list->begin;
 
-//    do
-//    {
-//        Element *next = iter->next;
-//        // free(iter->value);
-//        free(iter);
-//        iter = next;
-//    }
-//    while(iter != list->end);
+    do
+    {
+        Element *next = iter->next;
+        // free(iter->value);
+        free(iter);
+        iter = next;
+    }
+    while(iter != list->end);
 
-    // free(list->end); chyba już nie potrzebne
+     free(list->end); // chyba już nie potrzebne // TODO zastanwić się nad tym
     //reszta zostanie zwolniona przy usuwaniu obiektu memory
 
     free(list);
@@ -42,8 +55,12 @@ void deleteList(List *list)
 
 bool listInsert(Element *elem, void *value, Memory *memory)
 {
-    // TODO ew. zaimplementować moduł do zarządznia pamiecią
-    Element *newElem = getMemory(memory, sizeof(Element)); // calloc(1, sizeof(Element));
+
+    Element *newElem;
+    if(memory == NULL)
+        newElem = calloc(1, sizeof(Element));
+    else
+        newElem = getMemory(memory, sizeof(Element));
 
     if(newElem == NULL)
         return false;
@@ -58,6 +75,19 @@ bool listInsert(Element *elem, void *value, Memory *memory)
 
     newElem->value = value;
 
+
+    return true;
+}
+
+bool listRemove(Element *elem) // TODO napisać, że potem trzeba jeszcze zwolnić to co pod value
+{
+    if(elem->next == NULL || elem->prev == NULL)
+        return false;
+
+    elem->prev->next = elem->next;
+    elem->next->prev = elem->prev;
+
+    free(elem);
 
     return true;
 }
