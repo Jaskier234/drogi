@@ -23,7 +23,12 @@ set(CMAKE_C_FLAGS "-std=c11 -Wall -Wextra")
 set(SOURCE_FILES
     src/map.c
     src/map.h
-    src/map_main.c)
+    src/list.c
+    src/list.h
+    src/hashtable.c
+    src/hashtable.h
+    src/map_main.c
+    src/graph.c src/graph.h src/memory.c src/memory.h src/priority_queue.c src/priority_queue.h)
 
 # Wskazujemy plik wykonywalny.
 add_executable(map ${SOURCE_FILES})
