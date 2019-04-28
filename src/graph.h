@@ -25,6 +25,12 @@ typedef struct Graph
     int nodeCount;
 } Graph;
 
+typedef struct OrientedEdge
+{
+    int v;
+    Edge *edge;
+} OrientedEdge;
+
 Graph *newGraph();
 
 void deleteGraph(Graph *graph);

@@ -14,7 +14,7 @@ PriorityQueue *newPriorityQueue()
     return queue;
 }
 
-QueueElement *newQueueElement(int dist, int year, int parent)
+QueueElement *newQueueElement(int dist, int year, OrientedEdge *parent)
 {
     QueueElement *elem = calloc(1, sizeof(QueueElement));
 

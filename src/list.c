@@ -36,6 +36,9 @@ List *newList(Memory *memory)
 // pamięć pod wskaźnikiem przekazanym do listy zostanie zwolniona
 void deleteList(List *list)
 {
+    if(list == NULL)
+        return;
+
     Element *iter = list->begin;
 
     do

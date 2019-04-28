@@ -8,7 +8,6 @@ const int INF = INT_MAX;
 const int minYear = -2000;
 const int maxYear = 2100;
 
-
 Graph *newGraph()
 {
     Graph *graph = calloc(1, sizeof(Graph*));
@@ -18,6 +17,17 @@ Graph *newGraph()
 
     return graph;
 }
+
+OrientedEdge *newOrientedEdge(Edge *edge, int v)
+{
+    OrientedEdge *orientedEdge = calloc(1, sizeof(OrientedEdge));
+
+    orientedEdge->edge = edge;
+    orientedEdge->v = v;
+
+    return orientedEdge;
+}
+
 
 void deleteGraph(Graph *graph)
 {
@@ -152,7 +162,7 @@ List *bestPath(Graph *graph, int v1, int v2) // TODO pokminić czy long longi ni
         bestDistance[i].dist = INF;
         bestDistance[i].year = minYear - 1;
         bestDistance[i].nodeId = i;
-        bestDistance[i].parent = i;
+        bestDistance[i].parent = NULL;
     }
 
     bestDistance[v1].dist = 0;
@@ -180,7 +190,7 @@ List *bestPath(Graph *graph, int v1, int v2) // TODO pokminić czy long longi ni
                 {
                     bestDistance[other].dist = bestDistance[curr->nodeId].dist + ((Edge*)edges->value)->length;
                     bestDistance[other].year = min(bestDistance[curr->nodeId].year, ((Edge*)edges->value)->builtYear);
-                    bestDistance[other].parent = curr->nodeId;
+                    bestDistance[other].parent = newOrientedEdge(edges->value, curr->nodeId);
                     priorityQueuePush(q, &bestDistance[other]);
                 }
                 else if(bestDistance[other].dist == bestDistance[curr->nodeId].dist + ((Edge*)edges->value)->length)
@@ -188,7 +198,7 @@ List *bestPath(Graph *graph, int v1, int v2) // TODO pokminić czy long longi ni
                     if(bestDistance[other].year <= min(bestDistance[curr->nodeId].year, ((Edge*)edges->value)->builtYear)) // update bo lepszy rok
                     {
                         bestDistance[other].year = min(bestDistance[curr->nodeId].year, ((Edge*)edges->value)->builtYear);
-                        bestDistance[other].parent = curr->nodeId;
+                        bestDistance[other].parent = newOrientedEdge(edges->value, curr->nodeId);
                         priorityQueuePush(q, &bestDistance[other]);
                     }
                 }
@@ -200,20 +210,18 @@ List *bestPath(Graph *graph, int v1, int v2) // TODO pokminić czy long longi ni
     for(int i=0; i<graph->nodeCount; i++)
         graph->nodeTable[i]->visited = false;
 
-    if(bestDistance[v2].parent == v2)
+    if(bestDistance[v2].parent == NULL)
         return NULL;
 
     // TODO dodać ifa na to czy jest jednoznaczna ścieżka
 
     List *path = newList(NULL); // TODO zastanowić się czy nie dać memory
 
-    while(bestDistance[v2].parent != v2)
+    while(bestDistance[v2].parent != NULL)
     {
-        listInsert(path->begin, graph->nodeTable[v2]->id, NULL);
-        v2 = bestDistance[v2].parent;
+        listInsert(path->begin, bestDistance[v2].parent, NULL);
+        v2 = bestDistance[v2].parent->v;
     }
-    listInsert(path->begin, graph->nodeTable[v2]->id, NULL);
 
     return path;
-
 }
