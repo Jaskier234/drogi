@@ -22,7 +22,7 @@ typedef struct HashElem
 } HashElem;
 
 
-HashElem *newPair(void *key, void *value, int hash, Memory *memory) // TODO refaktor po parach na hashelem
+HashElem *newPair(void *key, void *value, int hash, Memory *memory) // TODO refaktor po parach na hashElem
 {
     HashElem *pair = getMemory(memory, sizeof(HashElem));
     pair->key = key;
@@ -129,6 +129,8 @@ long long hash(char *string)
 
     return hashValue;
 }
+
+// TODO forceInsert / quickInsert
 
 bool hashtableInsert(Hashtable **self, char *key, void *value)
 {

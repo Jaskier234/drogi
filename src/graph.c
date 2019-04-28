@@ -140,6 +140,9 @@ int min(int a, int b)
 // Jeśli taka droga nie istnieje lub nie da się jej jednodznacznie ustalić, to zwraca NULL
 List *bestPath(Graph *graph, int v1, int v2) // TODO pokminić czy long longi nie potrzebne
 {
+//    if(v1 >= graph->nodeCount || v2 >= graph->nodeCount)
+//        return NULL;
+
     PriorityQueue *q = newPriorityQueue();
 
     QueueElement *bestDistance = calloc(graph->nodeCount, sizeof(QueueElement));
@@ -193,4 +196,24 @@ List *bestPath(Graph *graph, int v1, int v2) // TODO pokminić czy long longi ni
             edges = edges->next;
         }
     }
+
+    for(int i=0; i<graph->nodeCount; i++)
+        graph->nodeTable[i]->visited = false;
+
+    if(bestDistance[v2].parent == v2)
+        return NULL;
+
+    // TODO dodać ifa na to czy jest jednoznaczna ścieżka
+
+    List *path = newList(NULL); // TODO zastanowić się czy nie dać memory
+
+    while(bestDistance[v2].parent != v2)
+    {
+        listInsert(path->begin, graph->nodeTable[v2]->id, NULL);
+        v2 = bestDistance[v2].parent;
+    }
+    listInsert(path->begin, graph->nodeTable[v2]->id, NULL);
+
+    return path;
+
 }
