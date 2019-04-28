@@ -1,8 +1,13 @@
 #ifndef DROGI_GRAPH_H
 #define DROGI_GRAPH_H
 
+#include <limits.h>
 #include "hashtable.h"
 #include "list.h"
+
+const int INF = INT_MAX;
+const int minYear = -2000;
+const int maxYear = 2100;
 
 typedef struct Node // TODO dodać label
 {
@@ -46,5 +51,7 @@ Edge *getEdge(Graph *graph, int v1, int v2);
 void removeEdge(Graph *graph, int v1, int v2);
 
 List *bestPath(Graph *graph, int v1, int v2);
+
+int min(int a, int b);
 
 #endif //DROGI_GRAPH_H

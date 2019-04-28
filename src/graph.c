@@ -2,11 +2,7 @@
 #include "priority_queue.h"
 
 #include <stdlib.h>
-#include <limits.h>
-
-const int INF = INT_MAX;
-const int minYear = -2000;
-const int maxYear = 2100;
+//#include <limits.h>
 
 Graph *newGraph()
 {
