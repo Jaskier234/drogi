@@ -10,7 +10,7 @@ typedef struct Map
 {
     Graph *graph;
     // TODO lista dróg krajowych
-    List *routeList;
+    List **routeList;
     Hashtable **labels;
 } Map;
 
@@ -22,7 +22,7 @@ Map *newMap(void)
         return NULL;
 
     map->graph = newGraph();
-    map->routeList = newList(NULL); // może da radę memory?
+    map->routeList = calloc(1000, sizeof(List*)); //newList(NULL); // może da radę memory? TODO przypisać cos
     map->labels = newHashtable(16, newMemory());
 
     if(map->graph == NULL || map->routeList == NULL || map->labels == NULL)
@@ -37,7 +37,12 @@ void deleteMap(Map *map)
         return;
 
     deleteGraph(map->graph);
-    deleteList(map->routeList);
+
+    for(int i=0; i<1000; i++)
+    {
+        deleteList(map->routeList[i]);
+    }
+
     deleteHashtable(map->labels);
     free(map);
 }
@@ -111,11 +116,42 @@ bool repairRoad(Map *map, const char *city1 , const char *city2, int repairYear)
 
 bool newRoute(Map *map, unsigned routeId, const char *city1, const char *city2)
 {
+    if(map->routeList[routeId] != NULL) // istnieje już droga krajowa o podanym numerze
+        return false;
+
+    if(routeId >= 1000) // niepoprawny numer drogi
+        return false;
+
+    if(!isNameCorrect(city1) || !isNameCorrect(city2)) // niepoprawna nazwa miasta
+        return false;
+
+    int *v1 = hashtableGet(map->labels, city1);
+    int *v2 = hashtableGet(map->labels, city2);
+
+    if(v1 == NULL || v2 == NULL) // któreś z podanych miast nie istnieje
+        return false;
+
+    if(v1 == v2) // podane miasta są identyczne
+        return false;
+
+    map->routeList[routeId] = bestPath(map->graph, v1, v2);
+
+    if(map->routeList[routeId] == NULL)
+        return false;
+
     return true;
 }
 
 bool extendRoute(Map *map, unsigned routeId, const char *city)
 {
+    if(map->routeList[routeId] == NULL) // nie ma drogi krajowej o podanym id
+        return false;
+
+    if(!isNameCorrect(city))
+        return false;
+
+
+
     return true;
 }
 
