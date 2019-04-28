@@ -14,6 +14,13 @@ typedef struct Map
     Hashtable **labels;
 } Map;
 
+typedef struct Change
+{
+    int routeId;
+    Element *placeOfChange; // TODO nazwa
+    List *path;
+} Change;
+
 Map *newMap(void)
 {
     Map *map = calloc(1, sizeof(Map));
@@ -45,6 +52,17 @@ void deleteMap(Map *map)
 
     deleteHashtable(map->labels);
     free(map);
+}
+
+Change *newChange(int routeId, Element *place, List *path)
+{
+    Change *change = calloc(1, sizeof(change));
+
+    change->routeId = routeId;
+    change->placeOfChange = place;
+    change->path = path;
+
+    return change;
 }
 
 // zwraca indeks miasta o podanej nazwie, a jeśli takie miasto nie istnieje to je tworzy(NULL wpp)
@@ -142,21 +160,148 @@ bool newRoute(Map *map, unsigned routeId, const char *city1, const char *city2)
     return true;
 }
 
+int lastCityId(Map *map, unsigned routeId)
+{
+    Element *elem = map->routeList[routeId]->end->prev;
+
+    int v = ((OrientedEdge*)elem->value)->v;
+    Edge *edge = ((OrientedEdge*)elem->value)->edge;
+
+    if(edge->v1 == v)
+        return edge->v1;
+    return edge->v2;
+}
+
+// zakłada poprawość route na wejściu
+void setRouteVisited(Map *map, unsigned routeId)
+{
+    Element *elem = map->routeList[routeId]->begin->next;
+    while(elem != map->routeList[routeId]->end)
+    {
+        int nodeId = ((OrientedEdge*)elem->value)->v;
+
+        map->graph->nodeTable[nodeId]->visited = true;
+
+        elem = elem->next;
+    }
+    int last = lastCityId(map, routeId);
+
+    map->graph->nodeTable[last]->visited = true;
+}
+
+int routeLength(List *route)
+{
+    int ans = 0;
+    Element *elem = route->begin->next;
+    while(elem != route->end)
+    {
+        ans += ((OrientedEdge*)elem->value)->edge->length;
+    }
+
+    return ans;
+}
+
 bool extendRoute(Map *map, unsigned routeId, const char *city)
 {
-    if(map->routeList[routeId] == NULL) // nie ma drogi krajowej o podanym id
+    if(routeId >= 1000 || map->routeList[routeId] == NULL) // nie ma drogi krajowej o podanym id
         return false;
 
     if(!isNameCorrect(city))
         return false;
 
+    int *v = hashtableGet(map->labels, city);
 
+    if(v == NULL)
+        return false;
+
+    int firstCity = ((OrientedEdge*)map->routeList[routeId]->begin->next->value)->v;
+    int lastCity = lastCityId(map, routeId);
+
+
+    // wyłącz wierzchołki drogi krajowej
+    setRouteVisited(map, routeId);
+    map->graph->nodeTable[firstCity]->visited =false;
+    List *path1 = bestPath(map->graph, *v, firstCity);
+
+    int pathLength1 = 0;
+    int pathYear1 = maxYear+1;
+    Element *elem1 = path1->begin->next;
+    while(elem1 != path1->end)
+    {
+        pathLength1 += ((OrientedEdge*)elem1->value)->edge->length;
+        pathYear1 = min(pathYear1, ((OrientedEdge*)elem1->value)->edge->builtYear);
+    }
+
+    setRouteVisited(map, routeId);
+    List *path2 = bestPath(map->graph, lastCity, *v);
+
+    int pathLength2 = 0;
+    int pathYear2 = maxYear + 1;
+    Element *elem2 = path2->begin->next;
+    while(elem2 != path2->end)
+    {
+        pathLength2 += ((OrientedEdge*)elem2->value)->edge->length;
+        pathYear2 = min(pathYear2, ((OrientedEdge*)elem2->value)->edge->builtYear);
+    }
+
+    if(pathLength1 < pathLength2 || (pathLength1 == pathLength2 && pathYear1 > pathLength2))
+    {
+        listInsertList(map->routeList[routeId]->begin, path1);
+    }
+    else
+    {
+        listInsertList(map->routeList[routeId]->end->prev, path2);
+    }
 
     return true;
 }
 
 bool removeRoad(Map *map, const char *city1, const char *city2)
 {
+    if(!isNameCorrect(city1) || !isNameCorrect(city2))
+        return false;
+
+    int *v1 = hashtableGet(map->labels, city1);
+    int *v2 = hashtableGet(map->labels, city2);
+
+    if(v1 == NULL || v2 == NULL)
+        return false;
+
+    Edge *removedEdge = getEdge(map->graph, *v1, *v2);
+
+//    Change
+
+    for(int i=0; i<1000; i++) // TODO ew. dodać do edge listę, która będzie przechowywać jakie drogi przechodzą po krawędzi
+    {
+        // szukamy krawędzi removedEdge w route o id i
+        Element *elem = map->routeList[i]->begin->next;
+        while(elem != map->routeList[i]->end)
+        {
+            OrientedEdge *road = elem->value;
+            if(road->edge == removedEdge)
+            {
+                // znaleźliśmy
+                int otherCityId;
+                if(road->edge->v1 == road->v)
+                    otherCityId = road->edge->v2;
+                else
+                    otherCityId = road->edge->v1;
+
+                // odwiedzamy wierzchołki
+                setRouteVisited(map, i);
+                map->graph->nodeTable[otherCityId]->visited = false;
+                List *path = bestPath(map->graph, road->v, otherCityId);
+
+                if(path != NULL) // nie da się. usuwamy Change
+                {
+
+                }
+
+                break;
+            }
+        }
+    }
+
     return true;
 }
 
