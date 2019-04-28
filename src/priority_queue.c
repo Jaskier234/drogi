@@ -14,6 +14,17 @@ PriorityQueue *newPriorityQueue()
     return queue;
 }
 
+QueueElement *newQueueElement(int dist, int year, int parent)
+{
+    QueueElement *elem = calloc(1, sizeof(QueueElement));
+
+    elem->dist = dist;
+    elem->year = year;
+    elem->parent = parent;
+
+    return elem;
+}
+
 void deletePriorityQueue(PriorityQueue *queue)
 {
     free(queue->content);
@@ -32,23 +43,20 @@ bool compare(QueueElement *a, QueueElement *b)
 // dodaje element do kolejki priorytetowej. zwraca false, gdy to się nie uda
 bool priorityQueuePush(PriorityQueue *queue, QueueElement *elem)
 {
-    if(queue->filled >= queue->size)
+    if(queue->filled+1 >= queue->size)
     {
         queue->content = realloc(queue->content, queue->size*2);
         queue->size *= 2;
 
         if(queue->content == NULL)
             return false;
-
-//        for(int i=queue->filled ; i<queue->size; i++)
-//            queue->content[i] = NULL;
     }
 
-    queue->content[queue->filled] = elem;
+    queue->content[queue->filled+1] = elem;
 
-    int index = queue->filled;
+    int index = queue->filled+1;
 
-    while( compare(queue->content[index], queue->content[index/2]) ) // compare(a,a) == false, więc pętla się zatrzyma, gdy index dojdzie do 0
+    while( index/2 > 0 && compare(queue->content[index], queue->content[index/2]) ) //?? compare(a,a) == false, więc pętla się zatrzyma, gdy index dojdzie do 0
     {
         QueueElement *temp = queue->content[index];
         queue->content[index] = queue->content[index/2];
@@ -57,27 +65,30 @@ bool priorityQueuePush(PriorityQueue *queue, QueueElement *elem)
         index /= 2;
     }
 
-    queue->filled++; // TODO ew. połączyć takie inkrementacje w 1 linijkę
+    queue->filled++;
 
     return true;
 }
 
-QueueElement *min(QueueElement *a, QueueElement *b)
+//QueueElement *min(QueueElement *a, QueueElement *b)
+//{
+//    if( compare(a,b) )
+//        return a;
+//    return b;
+//}
+
+QueueElement *priorityQueuePop(PriorityQueue *queue)
 {
-    if( compare(a,b) )
-        return a;
-    return b;
-}
+    if(isEmpty(queue))
+        return NULL;
 
-QueueElement *PriorityQueuePop(PriorityQueue *queue)
-{
-    QueueElement *res = queue->content[0];
+    QueueElement *res = queue->content[1];
 
-    QueueElement *temp = queue->content[0];
-    queue->content[0] = queue->content[queue->filled-1];
-    queue->content[queue->filled-1] = temp;
+    QueueElement *temp = queue->content[1];
+    queue->content[1] = queue->content[queue->filled];
+    queue->content[queue->filled] = temp;
 
-    int index = 0;
+    int index = 1;
 
     while( true )
     {

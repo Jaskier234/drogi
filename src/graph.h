@@ -4,10 +4,11 @@
 #include "hashtable.h"
 #include "list.h"
 
-typedef struct Node
+typedef struct Node // TODO dodać label
 {
     List *edges;
     int *id;
+    bool visited;
 } Node;
 
 typedef struct Egde
@@ -37,5 +38,7 @@ bool isInGraph(Graph *graph, int v);
 Edge *getEdge(Graph *graph, int v1, int v2);
 
 void removeEdge(Graph *graph, int v1, int v2);
+
+List *bestPath(Graph *graph, int v1, int v2);
 
 #endif //DROGI_GRAPH_H

@@ -6,6 +6,7 @@
 typedef struct QueueElement
 {
     int dist, year, parent;
+    int nodeId;
 } QueueElement;
 
 typedef struct PriorityQueue // TODO przenieść do *.c
@@ -16,6 +17,8 @@ typedef struct PriorityQueue // TODO przenieść do *.c
 } PriorityQueue;
 
 PriorityQueue *newPriorityQueue();
+
+QueueElement *newQueueElement(int dist, int year, int parent);
 
 void deletePriorityQueue(PriorityQueue *queue);
 

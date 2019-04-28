@@ -1,6 +1,13 @@
 #include "graph.h"
+#include "priority_queue.h"
 
 #include <stdlib.h>
+#include <limits.h>
+
+const int INF = INT_MAX;
+const int minYear = -2000;
+const int maxYear = 2100;
+
 
 Graph *newGraph()
 {
@@ -26,10 +33,11 @@ Node *newNode()
 
     node->edges = newList(NULL);
     node->id = calloc(1,sizeof(int));
+    node->visited = false;
     return node;
 }
 
-int *addNode(Graph *graph) // TODO zastanowić się czy nie skopiować napisu przed dodaniem do hashtablicy. Bo ktoś może podmienić
+int *addNode(Graph *graph) // TODO zastanowić się czy nie skopiować napisu przed dodaniem do hashtablicy. Bo ktoś może podmienić?
 {
 //    if(!isInGraph(graph, label))// TODO getHashtable + insert (2 przejścia niepotrzebnie)
 
@@ -121,4 +129,68 @@ void removeEdge(Graph *graph, int v1, int v2)
     free(edge1->value);
     listRemove(edge1);
     listRemove(edge2);
+}
+
+int min(int a, int b)
+{
+    return (a<b?a:b);
+}
+
+// Zwraca listę wierzchołków będącą najkrótszą drogą pomiędzy v1 i v2. Jeśli istnieje wiele takich, to zwraca "najnowszą"
+// Jeśli taka droga nie istnieje lub nie da się jej jednodznacznie ustalić, to zwraca NULL
+List *bestPath(Graph *graph, int v1, int v2) // TODO pokminić czy long longi nie potrzebne
+{
+    PriorityQueue *q = newPriorityQueue();
+
+    QueueElement *bestDistance = calloc(graph->nodeCount, sizeof(QueueElement));
+
+    for(int i=0; i<graph->nodeCount; i++)
+    {
+        bestDistance[i].dist = INF;
+        bestDistance[i].year = minYear - 1;
+        bestDistance[i].nodeId = i;
+        bestDistance[i].parent = i;
+    }
+
+    bestDistance[v1].dist = 0;
+    bestDistance[v1].year = maxYear + 1;
+
+    priorityQueuePush(q, &bestDistance[v1]);
+
+    while(!isEmpty(q))
+    {
+        QueueElement *curr = priorityQueuePop(q); // TODO niech curr to będzie int, id wierzchołka. Będzie łatwiej
+        graph->nodeTable[curr->nodeId]->visited = true;
+        Element *edges = graph->nodeTable[curr->nodeId]->edges->begin->next;
+
+        while(edges != graph->nodeTable[curr->nodeId]->edges->end)
+        {
+            int other;
+            if(curr->nodeId == ((Edge*)edges->value)->v1)
+                other = ((Edge*)edges->value)->v2;
+            else
+                other = ((Edge*)edges->value)->v1;
+
+            if(graph->nodeTable[other]->visited == false)
+            {
+                if(bestDistance[other].dist > bestDistance[curr->nodeId].dist + ((Edge*)edges->value)->length) // update bo odległość jest lepsza
+                {
+                    bestDistance[other].dist = bestDistance[curr->nodeId].dist + ((Edge*)edges->value)->length;
+                    bestDistance[other].year = min(bestDistance[curr->nodeId].year, ((Edge*)edges->value)->builtYear);
+                    bestDistance[other].parent = curr->nodeId;
+                    priorityQueuePush(q, &bestDistance[other]);
+                }
+                else if(bestDistance[other].dist == bestDistance[curr->nodeId].dist + ((Edge*)edges->value)->length)
+                {
+                    if(bestDistance[other].year <= min(bestDistance[curr->nodeId].year, ((Edge*)edges->value)->builtYear)) // update bo lepszy rok
+                    {
+                        bestDistance[other].year = min(bestDistance[curr->nodeId].year, ((Edge*)edges->value)->builtYear);
+                        bestDistance[other].parent = curr->nodeId;
+                        priorityQueuePush(q, &bestDistance[other]);
+                    }
+                }
+            }
+            edges = edges->next;
+        }
+    }
 }
