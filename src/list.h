@@ -27,6 +27,8 @@ bool listRemove(Element *elem);
 
 bool listPushBack(List *list, void *value, Memory *memory);
 
+bool listInsertList(Element *elem, List *list);
+
 // O(n)
 int listSize(List *list);
 

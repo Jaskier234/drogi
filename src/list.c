@@ -114,3 +114,16 @@ bool listPushBack(List *list, void *value, Memory *memory)
 {
     return listInsert(list->end->prev, value, memory);
 }
+
+bool listInsertList(Element *elem, List *list) // todo ew. poprawić na void
+{
+    Element *next = elem->next;
+
+    elem->next = list->begin->next;
+    list->end->prev->next = next;
+
+    next->prev = list->end->prev;
+    list->begin->next->prev = elem;
+
+    return true;
+}
