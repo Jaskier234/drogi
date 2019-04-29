@@ -157,7 +157,7 @@ bool hashtableInsert(Hashtable **self, char *key, void *value)
     return true;
 }
 
-void *hashtableGet(Hashtable **self, char *key)
+void *hashtableGet(Hashtable **self, const char *key)
 {
     int hashValue = hash(key);
     int index = hashValue%(*self)->MOD;

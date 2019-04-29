@@ -1,19 +1,20 @@
 #ifndef DROGI_GRAPH_H
 #define DROGI_GRAPH_H
 
-#include <limits.h>
+//#include <limits.h>
 #include "hashtable.h"
 #include "list.h"
 
-const int INF = INT_MAX;
-const int minYear = -2000;
-const int maxYear = 2100;
+const int INF;
+const int minYear;
+const int maxYear;
 
 typedef struct Node // TODO dodać label
 {
     List *edges;
     int *id;
     bool visited;
+    const char *label;
 } Node;
 
 typedef struct Egde
@@ -25,7 +26,6 @@ typedef struct Egde
 
 typedef struct Graph
 {
-//    Hashtable **labels;
     Node **nodeTable;
     int nodeCount;
 } Graph;
@@ -40,11 +40,11 @@ Graph *newGraph();
 
 void deleteGraph(Graph *graph);
 
-int * addNode(Graph *graph);
+int *addNode(Graph *graph, const char *label);
 
 bool addEdge(Graph *graph, int v1, int v2, int length, int builtYear);
 
-bool isInGraph(Graph *graph, int v);
+//bool isInGraph(Graph *graph, int v);
 
 Edge *getEdge(Graph *graph, int v1, int v2);
 

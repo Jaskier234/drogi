@@ -2,11 +2,15 @@
 #include "priority_queue.h"
 
 #include <stdlib.h>
-//#include <limits.h>
+#include <limits.h>
+
+const int INF = INT_MAX;
+const int minYear = -2000;
+const int maxYear = 2;
 
 Graph *newGraph()
 {
-    Graph *graph = calloc(1, sizeof(Graph*));
+    Graph *graph = calloc(1, sizeof(Graph));
 //    graph->labels = newHashtable(16, NULL);
     graph->nodeTable = calloc(10, sizeof(Node*));
     graph->nodeCount = 0;
@@ -31,7 +35,7 @@ void deleteGraph(Graph *graph)
     return;
 }
 
-Node *newNode()
+Node *newNode(const char *label)
 {
     Node *node = calloc(1, sizeof(Node));
     if(node == NULL)
@@ -40,14 +44,19 @@ Node *newNode()
     node->edges = newList(NULL);
     node->id = calloc(1,sizeof(int));
     node->visited = false;
+    if(label == NULL)// todo potem chyba to usunąć
+        node->label = "";
+    else
+        node->label = label;
     return node;
 }
 
-int *addNode(Graph *graph) // TODO zastanowić się czy nie skopiować napisu przed dodaniem do hashtablicy. Bo ktoś może podmienić?
+int *addNode(Graph *graph,
+             const char *label) // TODO zastanowić się czy nie skopiować napisu przed dodaniem do hashtablicy. Bo ktoś może podmienić?
 {
 //    if(!isInGraph(graph, label))// TODO getHashtable + insert (2 przejścia niepotrzebnie)
 
-    graph->nodeTable[graph->nodeCount] = newNode();
+    graph->nodeTable[graph->nodeCount] = newNode(label);
     if(graph->nodeTable[graph->nodeCount] == NULL)
         return NULL;
 
@@ -92,17 +101,15 @@ bool addEdge(Graph *graph, int v1, int v2, int length, int builtYear)
 }
 
 // chyba nie potrzebna ta funkcja
-bool isInGraph(Graph *graph, int v)
-{
-    // TODO poprawić tą funkcję albo usunąć jeśli niepotrzebna
-    return v < graph->nodeCount; // (hashtableGet(graph->labels, label) != NULL);
-}
+//bool isInGraph(Graph *graph, int v)
+//{
+//    // TODO poprawić tą funkcję albo usunąć jeśli niepotrzebna
+//    return v < graph->nodeCount; // (hashtableGet(graph->labels, label) != NULL);
+//}
 
 Edge *getEdge(Graph *graph, int v1, int v2)
 {
     // TODO szukać w wierzchołku o mniejszym stopniu
-//    int *v1 = hashtableGet(graph->labels, v1);
-//    int *v2 = hashtableGet(graph->labels, v2);
 
     // jeśli nie ma któregoś wierzchołka to zwraca NULL(bo nie ma też krawędzi)
 
@@ -132,7 +139,7 @@ void removeEdge(Graph *graph, int v1, int v2)
         edge2 = edge2->next;
     }
 
-    free(edge1->value);
+//    free(edge1->value);
     listRemove(edge1);
     listRemove(edge2);
 }
@@ -202,6 +209,8 @@ List *bestPath(Graph *graph, int v1, int v2) // TODO pokminić czy long longi ni
             edges = edges->next;
         }
     }
+
+    deletePriorityQueue(q);
 
     for(int i=0; i<graph->nodeCount; i++)
         graph->nodeTable[i]->visited = false;

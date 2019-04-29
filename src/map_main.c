@@ -19,21 +19,23 @@ void hashtableTime();
 void graphBasic();
 void queueBasic();
 void dijkstraBasic();
+void routeBasic();
 
 int main() {
     listBasic();
     hashtableBasic();
-//    hashtableTime();
+    hashtableTime();
     graphBasic();
     mapBasic();
     queueBasic();
     dijkstraBasic();
+    routeBasic();
     return 0;
 }
 
 void mapBasic()
 {
-//    char const* str;
+    char const* str;
 
     Map* m = newMap();
     assert(m);
@@ -58,18 +60,18 @@ void mapBasic()
     assert(repairRoad(m, "Emiliew", "Cielińsk-Niekłańsk", 2021));
     assert(repairRoad(m, "Emiliew", "Fraźnik Nowy", 2023));
     assert(addRoad(m, "Homilcin", "Cielińsk-Niekłańsk", 3, 2020));
-//    assert(newRoute(m, 10, "Alinów", "Emiliew"));
+    assert(newRoute(m, 10, "Alinów", "Emiliew"));
 
-//    str = getRouteDescription(m, 10);
-//    assert(strcmp(str, "10;Alinów;1;2020;Bór;2;2020;Cielińsk-Niekłańsk;4;2021;Emiliew") == 0);
-//    free((void *)str);
-//
-//    assert(extendRoute(m, 10, "Homilcin"));
-//
-//    str = getRouteDescription(m, 10);
-//    assert(strcmp(str, "10;Alinów;1;2020;Bór;2;2020;Cielińsk-Niekłańsk;4;2021;Emiliew"
-//                       ";3;2023;Fraźnik Nowy;4;2020;Grzegrzewo;5;2020;Homilcin") == 0);
-//    free((void *)str);
+    str = getRouteDescription(m, 10);
+    assert(strcmp(str, "10;Alinów;1;2020;Bór;2;2020;Cielińsk-Niekłańsk;4;2021;Emiliew") == 0);
+    free((void *)str);
+
+    assert(extendRoute(m, 10, "Homilcin"));
+
+    str = getRouteDescription(m, 10);
+    assert(strcmp(str, "10;Alinów;1;2020;Bór;2;2020;Cielińsk-Niekłańsk;4;2021;Emiliew"
+                       ";3;2023;Fraźnik Nowy;4;2020;Grzegrzewo;5;2020;Homilcin") == 0);
+    free((void *)str);
 
     deleteMap(m);
     printf("map OK\n");
@@ -161,24 +163,18 @@ void graphBasic()
 {
     Graph *graph = newGraph();
 
-    addNode(graph);
-    addNode(graph);
+    addNode(graph, NULL);
+    addNode(graph, NULL);
     addEdge(graph, 0, 1, 2, 2019);
-    addNode(graph);
+    addNode(graph, NULL);
     addEdge(graph, 0, 2, 4, 2019);
 
-    addNode(graph);
-    addNode(graph);
+    addNode(graph, NULL);
+    addNode(graph, NULL);
     addEdge(graph, 3, 4, 3, 2019);
 
     addEdge(graph, 3, 2, 7, 2019);
     addEdge(graph, 4, 2, 8, 2019);
-
-    assert(isInGraph(graph, 0));
-    assert(isInGraph(graph, 2));
-    assert(isInGraph(graph, 4));
-    assert(isInGraph(graph, 3));
-    assert(!isInGraph(graph, 5));
 
     assert(getEdge(graph, 0, 1)->length == 2);
     assert(getEdge(graph, 0, 2)->length == 4);
@@ -237,31 +233,31 @@ void dijkstraBasic()
 {
     Graph *graph = newGraph();
 
-    addNode(graph); // 0
-    addNode(graph); // 1
+    addNode(graph, NULL); // 0
+    addNode(graph, NULL); // 1
     addEdge(graph, 0, 1, 3, 2010);
 
-    addNode(graph); // 2
+    addNode(graph, NULL); // 2
     addEdge(graph, 1, 2,7, 2015);
 
-    addNode(graph); // 3
+    addNode(graph, NULL); // 3
     addEdge(graph, 0, 3, 10, 2000);
     addEdge(graph, 3, 1, 5, 2007);
     addEdge(graph, 2, 3, 2, 2008);
 
-    addNode(graph); // 4
+    addNode(graph, NULL); // 4
     addEdge(graph, 4, 3, 1, 2008);
 
-    addNode(graph); // 5
+    addNode(graph, NULL); // 5
     addEdge(graph, 5,3,5,2018);
     addEdge(graph, 5,4,5,2007);
 
-    addNode(graph); // 6
+    addNode(graph, NULL); // 6
     addEdge(graph, 6, 0, 1, 2011);
     addEdge(graph, 6, 4, 7, 2008);
 
 
-    addNode(graph); // 7
+    addNode(graph, NULL); // 7
     assert(bestPath(graph, 0, 7) == NULL);
     addEdge(graph, 2, 7, 8, 2003);
     addEdge(graph, 5, 7, 5, 2004);
@@ -281,4 +277,24 @@ void dijkstraBasic()
 
 
     printf("\ndijkstra OK\n");
+}
+
+void routeBasic()
+{
+    Map *map = newMap();
+
+    addRoad(map, "A", "B", 1, 2019);
+    addRoad(map, "C", "B", 1, 2019);
+    addRoad(map, "C", "D", 1, 2019);
+
+    newRoute(map, 12, "A", "D");
+    getRouteDescription(map, 12);
+
+    addRoad(map, "B", "X", 1, 2019);
+    addRoad(map, "C", "Y", 1, 2019);
+    addRoad(map, "X", "Y", 1, 2019);
+
+    removeRoad(map, "C", "B");
+    getRouteDescription(map, 12);
+
 }

@@ -16,7 +16,7 @@ void deleteHashtable(Hashtable **hash);
 // zwraca false jeśli nie uda się dodać
 bool hashtableInsert(Hashtable **self, char *key, void *value);
 
-void *hashtableGet(Hashtable **self, char *key);
+void *hashtableGet(Hashtable **self, const char *key);
 
 int maxListLength(Hashtable **hash);
 
