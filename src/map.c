@@ -76,7 +76,7 @@ Change *newChange(Element *position, List *path)
 
 char *strdup(const char *s)
 {
-    char* p = malloc(strlen(s)+1);
+    char* p = calloc(strlen(s)+1, sizeof(char));
     if (p) strcpy(p, s);
     return p;
 }
