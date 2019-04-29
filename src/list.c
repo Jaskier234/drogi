@@ -44,7 +44,8 @@ void deleteList(List *list)
     do
     {
         Element *next = iter->next;
-        // free(iter->value);
+//        if(del != NULL)
+//            del(iter->value);
         free(iter);
         iter = next;
     }
@@ -124,6 +125,9 @@ bool listInsertList(Element *elem, List *list) // todo ew. poprawić na void
 
     next->prev = list->end->prev;
     list->begin->next->prev = elem;
+
+    list->begin->next = list->end;
+    list->end->prev = list->begin;
 
     return true;
 }

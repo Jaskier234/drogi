@@ -9,12 +9,12 @@ const int INF;
 const int minYear;
 const int maxYear;
 
-typedef struct Node // TODO dodać label
+typedef struct Node
 {
     List *edges;
     int *id;
     bool visited;
-    const char *label;
+    char *label;
 } Node;
 
 typedef struct Egde
@@ -40,6 +40,8 @@ typedef struct OrientedEdge
 Graph *newGraph();
 
 void deleteGraph(Graph *graph);
+
+void deleteOrientedEdge(OrientedEdge *edge);
 
 int *addNode(Graph *graph, const char *label);
 

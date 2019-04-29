@@ -46,6 +46,17 @@ void deleteMap(Map *map)
 
     for(int i=0; i<1000; i++)
     {
+        if(map->routeList[i] != NULL)
+        {
+            Element *elem = map->routeList[i]->begin->next;
+            while(elem != map->routeList[i]->end)
+            {
+                free(elem->value);
+
+                elem = elem->next;
+            }
+        }
+
         deleteList(map->routeList[i]);
     }
 
@@ -107,7 +118,7 @@ bool addRoad(Map *map, const char *city1, const char *city2, unsigned length, in
     if(!isNameCorrect(city1) || !isNameCorrect(city2)) // niepoprawna nazwa któregoś z miast
         return false;
 
-    int *v1 = getCity(map, city1); // TODO ew. pokminić jak zrobić, żeby liczyć hasz tylko raz(a nie 2 przy get i insert)
+    int *v1 = getCity(map, city1);
     int *v2 = getCity(map, city2);
 
     if(v1 == NULL || v2 == NULL) // nie udało się stworzyć wierzchołków
@@ -255,6 +266,9 @@ bool extendRoute(Map *map, unsigned routeId, const char *city)
         listInsertList(map->routeList[routeId]->end->prev, path2);
     }
 
+    deleteList(path1);
+    deleteList(path2);
+
     return true;
 }
 
@@ -327,9 +341,13 @@ bool removeRoad(Map *map, const char *city1, const char *city2)
 
             listInsertList(change->positionOfChange, change->path);
 
+            free(elem->value);
+
             elem = elem->next;
         }
     }
+
+    deleteList(changes);
 
     return true;
 }
@@ -353,7 +371,7 @@ char *intToString(int a) // TODO potem podmienić na long long
         string[size-1-i] = temp;
     }
 
-    return string; // TODO odwrócić napis
+    return string;
 }
 
 char *concatenate(char *string1, char *string2, int *size, int *allocated)

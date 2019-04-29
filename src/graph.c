@@ -15,6 +15,7 @@ Graph *newGraph()
     graph->nodeTable = calloc(INIT_SIZE, sizeof(Node*));
     graph->tableSize = INIT_SIZE;
     graph->nodeCount = 0;
+//    graph->edges = newList(NULL);
 
     return graph;
 }
@@ -29,11 +30,33 @@ OrientedEdge *newOrientedEdge(Edge *edge, int v)
     return orientedEdge;
 }
 
+void deleteOrientedEdge(OrientedEdge *edge)
+{
+    free(edge);
+}
 
 void deleteGraph(Graph *graph)
 {
     // TODO deleteGraph
-    return;
+    for(int i=0; i<graph->nodeCount; i++)
+    {
+        free(graph->nodeTable[i]->label);
+        free(graph->nodeTable[i]->id);
+
+        Element *elem = graph->nodeTable[i]->edges->begin->next;
+        while(elem != graph->nodeTable[i]->edges->end)
+        {
+            Edge *edge = ((Edge*)elem->value);
+            elem = elem->next;
+
+            removeEdge(graph, edge->v1, edge->v2);
+
+            free(edge);
+        }
+        deleteList(graph->nodeTable[i]->edges);
+    }
+    free(graph->nodeTable);
+    free(graph);
 }
 
 Node *newNode(const char *label)
@@ -45,10 +68,7 @@ Node *newNode(const char *label)
     node->edges = newList(NULL);
     node->id = calloc(1,sizeof(int));
     node->visited = false;
-    if(label == NULL)// todo potem chyba to usunąć
-        node->label = "";
-    else
-        node->label = label;
+    node->label = label;
     return node;
 }
 
@@ -208,8 +228,6 @@ List *bestPath(Graph *graph, int v1, int v2) // TODO pokminić czy long longi ni
         }
     }
 
-    deletePriorityQueue(q);
-
     for(int i=0; i<graph->nodeCount; i++)
         graph->nodeTable[i]->visited = false;
 
@@ -219,8 +237,6 @@ List *bestPath(Graph *graph, int v1, int v2) // TODO pokminić czy long longi ni
     if(bestDistance[v2].pathCount != 1)
         return NULL;
 
-    // TODO dodać ifa na to czy jest jednoznaczna ścieżka
-
     List *path = newList(NULL); // TODO zastanowić się czy nie dać memory
 
     while(bestDistance[v2].parent != NULL)
@@ -228,6 +244,9 @@ List *bestPath(Graph *graph, int v1, int v2) // TODO pokminić czy long longi ni
         listInsert(path->begin, bestDistance[v2].parent, NULL);
         v2 = bestDistance[v2].parent->v;
     }
+
+    deletePriorityQueue(q);
+    free(bestDistance);
 
     return path;
 }
