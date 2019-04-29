@@ -1,7 +1,6 @@
 #ifndef DROGI_GRAPH_H
 #define DROGI_GRAPH_H
 
-//#include <limits.h>
 #include "hashtable.h"
 #include "list.h"
 
@@ -35,6 +34,7 @@ typedef struct OrientedEdge
 {
     int v;
     Edge *edge;
+    bool isInPath;
 } OrientedEdge;
 
 Graph *newGraph();
@@ -46,8 +46,6 @@ void deleteOrientedEdge(OrientedEdge *edge);
 int *addNode(Graph *graph, const char *label);
 
 bool addEdge(Graph *graph, int v1, int v2, int length, int builtYear);
-
-//bool isInGraph(Graph *graph, int v);
 
 Edge *getEdge(Graph *graph, int v1, int v2);
 

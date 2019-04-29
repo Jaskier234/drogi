@@ -18,7 +18,7 @@ typedef struct List
 
 List *newList(Memory *memory);
 
-void deleteList(List *list);
+void deleteList(List *list, bool del);
 
 // wstawia element do listy po elem
 bool listInsert(Element *elem, void *value, Memory *memory);
@@ -27,7 +27,7 @@ bool listRemove(Element *elem);
 
 bool listPushBack(List *list, void *value, Memory *memory);
 
-bool listInsertList(Element *elem, List *list);
+void listInsertList(Element *elem, List *list);
 
 // O(n)
 int listSize(List *list);

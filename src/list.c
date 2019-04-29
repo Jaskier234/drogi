@@ -34,7 +34,7 @@ List *newList(Memory *memory)
 }
 
 // pamięć pod wskaźnikiem przekazanym do listy zostanie zwolniona
-void deleteList(List *list)
+void deleteList(List *list, bool del)
 {
     if(list == NULL)
         return;
@@ -44,15 +44,14 @@ void deleteList(List *list)
     do
     {
         Element *next = iter->next;
-//        if(del != NULL)
-//            del(iter->value);
+        if(del)
+            free(iter->value);
         free(iter);
         iter = next;
     }
     while(iter != list->end);
 
-     free(list->end); // chyba już nie potrzebne // TODO zastanwić się nad tym
-    //reszta zostanie zwolniona przy usuwaniu obiektu memory
+     free(list->end);
 
     free(list);
 }
@@ -83,7 +82,7 @@ bool listInsert(Element *elem, void *value, Memory *memory)
     return true;
 }
 
-bool listRemove(Element *elem) // TODO napisać, że potem trzeba jeszcze zwolnić to co pod value
+bool listRemove(Element *elem)
 {
     if(elem->next == NULL || elem->prev == NULL)
         return false;
@@ -116,7 +115,8 @@ bool listPushBack(List *list, void *value, Memory *memory)
     return listInsert(list->end->prev, value, memory);
 }
 
-bool listInsertList(Element *elem, List *list) // todo ew. poprawić na void
+// Dodaje do listy wszystkie elementy drugiej listy
+void listInsertList(Element *elem, List *list)
 {
     Element *next = elem->next;
 
@@ -128,6 +128,4 @@ bool listInsertList(Element *elem, List *list) // todo ew. poprawić na void
 
     list->begin->next = list->end;
     list->end->prev = list->begin;
-
-    return true;
 }

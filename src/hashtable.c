@@ -22,7 +22,7 @@ typedef struct HashElem
 } HashElem;
 
 
-HashElem *newPair(void *key, void *value, int hash, Memory *memory) // TODO refaktor po parach na hashElem
+HashElem *newPair(void *key, void *value, int hash, Memory *memory)
 {
     HashElem *pair = getMemory(memory, sizeof(HashElem));
     pair->key = key;
@@ -48,20 +48,6 @@ Hashtable **newHashtable(int size, Memory *memory)
 
 void deleteHashtableContent(Hashtable **hash)
 {
-//    for(int i=0; i<(*hash)->MOD; i++)
-//    {
-//        if((*hash)->table[i] != NULL)
-//        {
-//            Element *elem = (*hash)->table[i]->begin->next;
-//            while(elem != (*hash)->table[i]->end)
-//            {
-//                free(((HashElem*)elem->value)->key);
-//                free(((HashElem*)elem->value)->value);
-//
-//                elem = elem->next;
-//            }
-//        }
-//    }
     deleteMemory((*hash)->memory);
     free((*hash)->table);
     free(*hash);
@@ -73,10 +59,12 @@ void deleteHashtable(Hashtable **hash)
     free(hash);
 }
 
+// Zmienia rozmiar tablicy haszującej
 bool changeSize(Hashtable **hash, int newSize)
 {
     Hashtable **newHash = newHashtable(newSize, NULL);
-    // TODO sprawdzić czy się udało
+    if(newHash == NULL)
+        return false;
 
     for(int i=0; i<(*hash)->MOD; i++)
     {
@@ -108,7 +96,6 @@ bool changeSize(Hashtable **hash, int newSize)
 
     free(newHash);
 
-
     return true;
 }
 
@@ -127,11 +114,14 @@ long long hash(char *string)
         string++;
     }
 
+    if(hashValue < 0)
+        return hashValue + MOD;
     return hashValue;
 }
 
-// TODO forceInsert / quickInsert
-
+// Wstawia do tablicy obiekt value pod klucz key.
+// Jeśli w tablicy była już wartość pod kluczem key, to ją zamienia
+// Zwraca false gdy nie udało się zaalokować pamięci
 bool hashtableInsert(Hashtable **self, char *key, void *value)
 {
     int hashValue = hash(key);
@@ -152,11 +142,13 @@ bool hashtableInsert(Hashtable **self, char *key, void *value)
 
     (*self)->filled++;
     if((*self)->filled * 2 > (*self)->MOD)
-        changeSize(self, (*self)->MOD * 2 );
+        if(!changeSize(self, (*self)->MOD * 2 ))
+            return false;
 
     return true;
 }
 
+// Zwraca obiekt dodany wcześniej do tablicy, lub NULL gdy nie ma takiego
 void *hashtableGet(Hashtable **self, const char *key)
 {
     int hashValue = hash(key);
@@ -171,7 +163,7 @@ void *hashtableGet(Hashtable **self, const char *key)
         elem = elem->next;
 
     if(elem->next != NULL)
-        return ((HashElem *)elem->value)->value;// TODO naprawić kolizję nazw value
+        return ((HashElem *)elem->value)->value;
     else
         return NULL;
 }

@@ -4,7 +4,7 @@
 
 typedef struct Memory
 {
-    void ***content; // TODO lepsza nazwa
+    void ***content;
     unsigned int currentIndex;
     unsigned int size;
     unsigned int filled;

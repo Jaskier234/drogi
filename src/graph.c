@@ -5,8 +5,8 @@
 #include <limits.h>
 
 const int INF = INT_MAX;
-const int minYear = -2000;
-const int maxYear = 2;
+const int minYear = INT_MIN;
+const int maxYear = INT_MAX;
 
 Graph *newGraph()
 {
@@ -15,7 +15,6 @@ Graph *newGraph()
     graph->nodeTable = calloc(INIT_SIZE, sizeof(Node*));
     graph->tableSize = INIT_SIZE;
     graph->nodeCount = 0;
-//    graph->edges = newList(NULL);
 
     return graph;
 }
@@ -26,6 +25,7 @@ OrientedEdge *newOrientedEdge(Edge *edge, int v)
 
     orientedEdge->edge = edge;
     orientedEdge->v = v;
+    orientedEdge->isInPath = false;
 
     return orientedEdge;
 }
@@ -37,7 +37,6 @@ void deleteOrientedEdge(OrientedEdge *edge)
 
 void deleteGraph(Graph *graph)
 {
-    // TODO deleteGraph
     for(int i=0; i<graph->nodeCount; i++)
     {
         free(graph->nodeTable[i]->label);
@@ -53,7 +52,7 @@ void deleteGraph(Graph *graph)
 
             free(edge);
         }
-        deleteList(graph->nodeTable[i]->edges);
+        deleteList(graph->nodeTable[i]->edges, 0);
     }
     free(graph->nodeTable);
     free(graph);
@@ -121,8 +120,8 @@ bool addEdge(Graph *graph, int v1, int v2, int length, int builtYear)
 
 Edge *getEdge(Graph *graph, int v1, int v2)
 {
-    // TODO szukać w wierzchołku o mniejszym stopniu
-
+    if(v1 == v2)
+        return NULL;
     // jeśli nie ma któregoś wierzchołka to zwraca NULL(bo nie ma też krawędzi)
 
     Element *elem = graph->nodeTable[v1]->edges->begin->next;
@@ -131,13 +130,11 @@ Edge *getEdge(Graph *graph, int v1, int v2)
     {
         elem = elem->next;
     }
-    return elem->value;
+    return elem->value; // na wartość NULL, gdy nie znaleziono krawędzi
 }
 
 void removeEdge(Graph *graph, int v1, int v2)
 {
-//    Egde *egde = getEdge(graph, label1, )
-
     Element *edge1 = graph->nodeTable[v1]->edges->begin->next;
     Element *edge2 = graph->nodeTable[v2]->edges->begin->next;
 
@@ -151,7 +148,6 @@ void removeEdge(Graph *graph, int v1, int v2)
         edge2 = edge2->next;
     }
 
-//    free(edge1->value);
     listRemove(edge1);
     listRemove(edge2);
 }
@@ -163,11 +159,8 @@ int min(int a, int b)
 
 // Zwraca listę wierzchołków będącą najkrótszą drogą pomiędzy v1 i v2. Jeśli istnieje wiele takich, to zwraca "najnowszą"
 // Jeśli taka droga nie istnieje lub nie da się jej jednodznacznie ustalić, to zwraca NULL
-List *bestPath(Graph *graph, int v1, int v2) // TODO pokminić czy long longi nie potrzebne
+List *bestPath(Graph *graph, int v1, int v2)
 {
-//    if(v1 >= graph->nodeCount || v2 >= graph->nodeCount)
-//        return NULL;
-
     PriorityQueue *q = newPriorityQueue();
 
     QueueElement *bestDistance = calloc(graph->nodeCount, sizeof(QueueElement));
@@ -175,21 +168,21 @@ List *bestPath(Graph *graph, int v1, int v2) // TODO pokminić czy long longi ni
     for(int i=0; i<graph->nodeCount; i++)
     {
         bestDistance[i].dist = INF;
-        bestDistance[i].year = minYear - 1;
+        bestDistance[i].year = minYear;
         bestDistance[i].nodeId = i;
         bestDistance[i].parent = NULL;
         bestDistance[i].pathCount = 0;
     }
 
     bestDistance[v1].dist = 0;
-    bestDistance[v1].year = maxYear + 1;
+    bestDistance[v1].year = maxYear;
     bestDistance[v1].pathCount = 1;
 
     priorityQueuePush(q, &bestDistance[v1]);
 
     while(!isEmpty(q))
     {
-        QueueElement *curr = priorityQueuePop(q); // TODO niech curr to będzie int, id wierzchołka. Będzie łatwiej
+        QueueElement *curr = priorityQueuePop(q);
         graph->nodeTable[curr->nodeId]->visited = true;
         Element *edges = graph->nodeTable[curr->nodeId]->edges->begin->next;
 
@@ -231,21 +224,29 @@ List *bestPath(Graph *graph, int v1, int v2) // TODO pokminić czy long longi ni
     for(int i=0; i<graph->nodeCount; i++)
         graph->nodeTable[i]->visited = false;
 
-//    if(bestDistance[v2].parent == NULL)
-//        return NULL;
-
-    if(bestDistance[v2].pathCount != 1)
+    if(bestDistance[v2].pathCount != 1 || bestDistance[v2].parent == NULL)
+    {
+        deletePriorityQueue(q);
+        for(int i=0; i<graph->nodeCount; i++)
+            if(bestDistance[i].parent != NULL && bestDistance[i].parent->isInPath == false)
+                free(bestDistance[i].parent);
+        free(bestDistance);
         return NULL;
+    }
 
-    List *path = newList(NULL); // TODO zastanowić się czy nie dać memory
+    List *path = newList(NULL);
 
     while(bestDistance[v2].parent != NULL)
     {
         listInsert(path->begin, bestDistance[v2].parent, NULL);
+        bestDistance[v2].parent->isInPath = true;
         v2 = bestDistance[v2].parent->v;
     }
 
     deletePriorityQueue(q);
+    for(int i=0; i<graph->nodeCount; i++)
+        if(bestDistance[i].parent != NULL && bestDistance[i].parent->isInPath == false)
+            free(bestDistance[i].parent);
     free(bestDistance);
 
     return path;

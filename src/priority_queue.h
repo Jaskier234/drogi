@@ -12,7 +12,7 @@ typedef struct QueueElement
     int pathCount;
 } QueueElement;
 
-typedef struct PriorityQueue // TODO przenieść do *.c
+typedef struct PriorityQueue
 {
     QueueElement **content;
     int size;

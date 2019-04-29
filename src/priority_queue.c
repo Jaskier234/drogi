@@ -57,7 +57,7 @@ bool priorityQueuePush(PriorityQueue *queue, QueueElement *elem)
 
     int index = queue->filled+1;
 
-    while( index/2 > 0 && compare(queue->content[index], queue->content[index/2]) ) //?? compare(a,a) == false, więc pętla się zatrzyma, gdy index dojdzie do 0
+    while( index/2 > 0 && compare(queue->content[index], queue->content[index/2]) )
     {
         QueueElement *temp = queue->content[index];
         queue->content[index] = queue->content[index/2];
@@ -70,13 +70,6 @@ bool priorityQueuePush(PriorityQueue *queue, QueueElement *elem)
 
     return true;
 }
-
-//QueueElement *min(QueueElement *a, QueueElement *b)
-//{
-//    if( compare(a,b) )
-//        return a;
-//    return b;
-//}
 
 QueueElement *priorityQueuePop(PriorityQueue *queue)
 {
@@ -107,7 +100,7 @@ QueueElement *priorityQueuePop(PriorityQueue *queue)
                 next = index*2+1;
         }
 
-        if(compare(queue->content[next], queue->content[index])) // swap
+        if(compare(queue->content[next], queue->content[index]))
         {
             temp = queue->content[next];
             queue->content[next] = queue->content[index];

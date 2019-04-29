@@ -14,10 +14,16 @@ typedef struct Map
     Hashtable **labels;
 } Map;
 
+/**
+ * Struktura przechowująca zmiany w strukturze dróg krajowych.
+ * W funkcji @ref removeRoad zmiany najpierw dodawane są do struktury
+ * @ref Change, a dopiero gdy wszystkie okarzą się poprawne, są dodawane do
+ * struktury dróg.
+ */
 typedef struct Change
 {
-    Element *positionOfChange;
-    List *path;
+    Element *positionOfChange; ///< element litsy dróg krajowych po którym należy wstawić nowe krawędzie drogi
+    List *path; ///< lista krawędzi, które należy wstawić do drogi
 } Change;
 
 Map *newMap(void)
@@ -56,14 +62,19 @@ void deleteMap(Map *map)
                 elem = elem->next;
             }
         }
-
-        deleteList(map->routeList[i]);
+        deleteList(map->routeList[i], 0);
     }
 
     deleteHashtable(map->labels);
     free(map);
 }
 
+/**
+ * @brief Inicjalizuje i zwraca instancję struktury @ref Change
+ * @param position - element litsy dróg krajowych po którym należy wstawić nowe krawędzie drogi
+ * @param path - lista krawędzi, które należy wstawić do drogi
+ * @return wzkaźnik na strukturę Change, lub NULL, gdy nie udało się zaalokować pamięci
+ */
 Change *newChange(Element *position, List *path)
 {
     Change *change = calloc(1, sizeof(Change));
@@ -74,6 +85,7 @@ Change *newChange(Element *position, List *path)
     return change;
 }
 
+// Tworzy kopię napisu i zwraca wskaźnik na nią
 char *strdup(const char *s)
 {
     char* p = calloc(strlen(s)+1, sizeof(char));
@@ -81,7 +93,8 @@ char *strdup(const char *s)
     return p;
 }
 
-// zwraca indeks miasta o podanej nazwie, a jeśli takie miasto nie istnieje to je tworzy(NULL wpp)
+// zwraca indeks miasta o podanej nazwie, a jeśli takie miasto nie istnieje to je tworzy
+// zwraca NULL, gdy nie udało się zaalokować pamięci
 // zakłada poprawność nazwy miasta
 int *getCity(Map *map, const char *city)
 {
@@ -90,16 +103,22 @@ int *getCity(Map *map, const char *city)
     if( v != NULL) // miasto już istnieje
         return v;
 
-    v = addNode(map->graph, strdup(city));
+    char *cityCp = strdup(city);
+    v = addNode(map->graph, cityCp);
     if(v == NULL) // nie udało się zaalokować
+    {
+        free(cityCp);
         return NULL;
+    }
 
-    if(hashtableInsert(map->labels, city, v))
+
+    if(hashtableInsert(map->labels, cityCp, v))
         return v;
+    free(cityCp);
     return NULL; // nie udało się dodać do hashtable
-
 }
 
+// Sprawdza poprawność nazwy miasta
 bool isNameCorrect(const char *cityName)
 {
     while(*cityName != 0)
@@ -111,11 +130,12 @@ bool isNameCorrect(const char *cityName)
     return true;
 }
 
-
-
 bool addRoad(Map *map, const char *city1, const char *city2, unsigned length, int builtYear)
 {
     if(!isNameCorrect(city1) || !isNameCorrect(city2)) // niepoprawna nazwa któregoś z miast
+        return false;
+
+    if(strcmp(city1, city2) == 0) // to samo miasto na wejściu
         return false;
 
     int *v1 = getCity(map, city1);
@@ -123,9 +143,12 @@ bool addRoad(Map *map, const char *city1, const char *city2, unsigned length, in
 
     if(v1 == NULL || v2 == NULL) // nie udało się stworzyć wierzchołków
         return false;
-//
-//    if(getEdge(map->graph, *v1, *v2) != NULL) // droga już istnieje
-//        return false; // TODO sprawdzić dodawanie 2 razy tej samej drogi
+
+    if(length == 0)
+        return false;
+
+    if(builtYear == 0)
+        return false;
 
     return addEdge(map->graph, *v1, *v2, length, builtYear);
 }
@@ -155,10 +178,7 @@ bool repairRoad(Map *map, const char *city1 , const char *city2, int repairYear)
 
 bool newRoute(Map *map, unsigned routeId, const char *city1, const char *city2)
 {
-    if(map->routeList[routeId] != NULL) // istnieje już droga krajowa o podanym numerze
-        return false;
-
-    if(routeId >= 1000) // niepoprawny numer drogi
+    if(routeId >= 1000 || map->routeList[routeId] != NULL) // istnieje już droga krajowa o podanym numerze
         return false;
 
     if(!isNameCorrect(city1) || !isNameCorrect(city2)) // niepoprawna nazwa miasta
@@ -170,7 +190,7 @@ bool newRoute(Map *map, unsigned routeId, const char *city1, const char *city2)
     if(v1 == NULL || v2 == NULL) // któreś z podanych miast nie istnieje
         return false;
 
-    if(v1 == v2) // podane miasta są identyczne
+    if(*v1 == *v2) // podane miasta są identyczne
         return false;
 
     map->routeList[routeId] = bestPath(map->graph, *v1, *v2);
@@ -181,6 +201,7 @@ bool newRoute(Map *map, unsigned routeId, const char *city1, const char *city2)
     return true;
 }
 
+// Zwraca id ostatniego miasta na drodze krajowej
 int lastCityId(Map *map, unsigned routeId)
 {
     Element *elem = map->routeList[routeId]->end->prev;
@@ -193,6 +214,8 @@ int lastCityId(Map *map, unsigned routeId)
     return edge->v1;
 }
 
+// Oznacza wierzchołki danej drogi krajowej jako odwiedzone, aby uniknąć powtórzeń
+// miast na drodze krajowej
 // zakłada poprawość route na wejściu
 void setRouteVisited(Map *map, unsigned routeId)
 {
@@ -226,6 +249,16 @@ bool extendRoute(Map *map, unsigned routeId, const char *city)
     int firstCity = ((OrientedEdge*)map->routeList[routeId]->begin->next->value)->v;
     int lastCity = lastCityId(map, routeId);
 
+    // sprawdzanie, czy wierzchołek znajduje się na drodze krajowej
+    Element *elem = map->routeList[routeId]->begin->next;
+    while(elem != map->routeList[routeId]->end)
+    {
+        if( *v == ((OrientedEdge*)elem->value)->v )
+            return false;
+        elem = elem->next;
+    }
+    if(lastCity == *v)
+        return false;
 
     // wyłącz wierzchołki drogi krajowej
     setRouteVisited(map, routeId);
@@ -234,13 +267,16 @@ bool extendRoute(Map *map, unsigned routeId, const char *city)
 
     int pathLength1 = 0;
     int pathYear1 = maxYear+1;
-    Element *elem1 = path1->begin->next;
-    while(elem1 != path1->end)
+    if(path1 != NULL)
     {
-        pathLength1 += ((OrientedEdge*)elem1->value)->edge->length;
-        pathYear1 = min(pathYear1, ((OrientedEdge*)elem1->value)->edge->builtYear);
+        Element *elem1 = path1->begin->next;
+        while(elem1 != path1->end)
+        {
+            pathLength1 += ((OrientedEdge*)elem1->value)->edge->length;
+            pathYear1 = min(pathYear1, ((OrientedEdge*)elem1->value)->edge->builtYear);
 
-        elem1 = elem1->next;
+            elem1 = elem1->next;
+        }
     }
 
     setRouteVisited(map, routeId);
@@ -248,26 +284,28 @@ bool extendRoute(Map *map, unsigned routeId, const char *city)
 
     int pathLength2 = 0;
     int pathYear2 = maxYear + 1;
-    Element *elem2 = path2->begin->next;
-    while(elem2 != path2->end)
+    if(path2 != NULL)
     {
-        pathLength2 += ((OrientedEdge*)elem2->value)->edge->length;
-        pathYear2 = min(pathYear2, ((OrientedEdge*)elem2->value)->edge->builtYear);
+        Element *elem2 = path2->begin->next;
+        while(elem2 != path2->end)
+        {
+            pathLength2 += ((OrientedEdge*)elem2->value)->edge->length;
+            pathYear2 = min(pathYear2, ((OrientedEdge*)elem2->value)->edge->builtYear);
 
-        elem2 = elem2->next;
+            elem2 = elem2->next;
+        }
     }
 
-    if(pathLength1 < pathLength2 || (pathLength1 == pathLength2 && pathYear1 > pathLength2))
-    {
+    if(path1 == NULL && path2 == NULL) return false;
+    if(path2 == NULL) listInsertList(map->routeList[routeId]->begin, path1);
+    else if(path1 == NULL) listInsertList(map->routeList[routeId]->end->prev, path2);
+    else if(pathLength1 < pathLength2 || (pathLength1 == pathLength2 && pathYear1 > pathLength2))
         listInsertList(map->routeList[routeId]->begin, path1);
-    }
     else
-    {
         listInsertList(map->routeList[routeId]->end->prev, path2);
-    }
 
-    deleteList(path1);
-    deleteList(path2);
+    deleteList(path1, true);
+    deleteList(path2, true);
 
     return true;
 }
@@ -285,11 +323,14 @@ bool removeRoad(Map *map, const char *city1, const char *city2)
 
     Edge *removedEdge = getEdge(map->graph, *v1, *v2);
 
+    if(removedEdge == NULL)
+        return false;
+
     removeEdge(map->graph, *v1, *v2);
 
-    List *changes = newList(NULL);// https://www.youtube.com/watch?v=Cj25UpcBDt0 TODO pomyśleć nad memory. i usunąć link
+    List *changes = newList(NULL);
 
-    for(int i=0; i<1000 && changes != NULL; i++) // TODO ew. dodać do edge listę, która będzie przechowywać jakie drogi przechodzą po krawędzi
+    for(int i=0; i<1000 && changes != NULL; i++)
     {
         if(map->routeList[i] == NULL)
             continue;
@@ -320,8 +361,21 @@ bool removeRoad(Map *map, const char *city1, const char *city2)
                 }
                 else // usuwamy całą zmianę
                 {
-                    // TODO zwalniamy pamięć;
-                    changes = NULL; // TODO może jakiś lepszy sposób na zatrzymanie
+                    Element *elem = changes->begin->next;
+                    while(elem != changes->end)
+                    {
+                        Change *change = (Change*)elem->value;
+
+                        listInsertList(change->positionOfChange, change->path);
+
+                        free(elem->value);
+
+                        elem = elem->next;
+                    }
+                    deleteList(changes, 0);
+                    changes = NULL;
+                    addEdge(map->graph, *v1, *v2, removedEdge->length, removedEdge->builtYear);
+                    return false;
                 }
 
                 break; // znaleźliśmy potrzbną krawędź. Nie trzeba dalej przeszukiwać listy krawędzi
@@ -338,30 +392,38 @@ bool removeRoad(Map *map, const char *city1, const char *city2)
         while(elem != changes->end)
         {
             Change *change = (Change*)elem->value;
-
             listInsertList(change->positionOfChange, change->path);
-
             free(elem->value);
-
             elem = elem->next;
         }
     }
 
-    deleteList(changes);
+    deleteList(changes, 0);
 
     return true;
 }
 
-char *intToString(int a) // TODO potem podmienić na long long
+// Konwertuje liczbę na napis
+char *intToString(int a)
 {
     char *string = calloc(20, sizeof(char));
     int size=0;
+
+    bool minus = (a<0);
+    if(a<0)
+        a *= -1;
 
     while(a > 0)
     {
         string[size] = a%10 + '0';
         size++;
         a /= 10;
+    }
+
+    if(minus)
+    {
+        string[size] = '-';
+        size++;
     }
 
     for(int i=0; i<size/2; i++)
@@ -374,6 +436,7 @@ char *intToString(int a) // TODO potem podmienić na long long
     return string;
 }
 
+// Łączy dwa napisy
 char *concatenate(char *string1, char *string2, int *size, int *allocated)
 {
     while(*string2 != 0)
@@ -392,7 +455,6 @@ char *concatenate(char *string1, char *string2, int *size, int *allocated)
         string2++;
     }
     string1[*size] = 0;
-//    (*size)++;
 
     return string1;
 }
@@ -402,9 +464,8 @@ char const* getRouteDescription(Map *map, unsigned routeId)
     int size = 0;
     int allocated = 16;
     char *description = calloc(allocated, sizeof(char));
-//    description = "";
 
-    if(map->routeList[routeId] == NULL) // droga nie istnieje
+    if(routeId >= 1000 || map->routeList[routeId] == NULL) // droga nie istnieje
         return description;
 
     char *routeNr = intToString(routeId);
