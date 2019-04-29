@@ -9,6 +9,7 @@ typedef struct QueueElement
     int dist, year;
     OrientedEdge *parent;
     int nodeId;
+    int pathCount;
 } QueueElement;
 
 typedef struct PriorityQueue // TODO przenieść do *.c
@@ -20,7 +21,7 @@ typedef struct PriorityQueue // TODO przenieść do *.c
 
 PriorityQueue *newPriorityQueue();
 
-QueueElement *newQueueElement(int dist, int year, OrientedEdge *parent);
+QueueElement *newQueueElement(int dist, int year, OrientedEdge *parent, int pathCount);
 
 void deletePriorityQueue(PriorityQueue *queue);
 

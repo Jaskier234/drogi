@@ -7,20 +7,21 @@ PriorityQueue *newPriorityQueue()
     unsigned int INITIAL_SIZE = 10;
 
     PriorityQueue *queue = calloc(1, sizeof(PriorityQueue));
-    queue->content = calloc(INITIAL_SIZE, sizeof(QueueElement*));// TODO (*)wskaźniki czy cała struktura?
+    queue->content = calloc(INITIAL_SIZE, sizeof(QueueElement*));
     queue->size = INITIAL_SIZE;
     queue->filled = 0;
 
     return queue;
 }
 
-QueueElement *newQueueElement(int dist, int year, OrientedEdge *parent)
+QueueElement *newQueueElement(int dist, int year, OrientedEdge *parent, int pathCount)
 {
     QueueElement *elem = calloc(1, sizeof(QueueElement));
 
     elem->dist = dist;
     elem->year = year;
     elem->parent = parent;
+    elem->pathCount = pathCount;
 
     return elem;
 }
@@ -38,7 +39,7 @@ bool compare(QueueElement *a, QueueElement *b)
     if(a->dist == b->dist)
         return a->year > b->year;
     return a->dist < b->dist;
-} // TODO czy to działa?
+}
 
 // dodaje element do kolejki priorytetowej. zwraca false, gdy to się nie uda
 bool priorityQueuePush(PriorityQueue *queue, QueueElement *elem)
@@ -108,7 +109,7 @@ QueueElement *priorityQueuePop(PriorityQueue *queue)
 
         if(compare(queue->content[next], queue->content[index])) // swap
         {
-            QueueElement *temp = queue->content[next];
+            temp = queue->content[next];
             queue->content[next] = queue->content[index];
             queue->content[index] = temp;
 
