@@ -20,6 +20,7 @@ void graphBasic();
 void queueBasic();
 void dijkstraBasic();
 void routeBasic();
+void multipleRoutes();
 
 int main() {
     listBasic();
@@ -30,6 +31,7 @@ int main() {
     queueBasic();
     dijkstraBasic();
     routeBasic();
+    multipleRoutes();
     return 0;
 }
 
@@ -199,10 +201,10 @@ void queueBasic()
 {
     PriorityQueue *queue = newPriorityQueue();
 
-    priorityQueuePush(queue, newQueueElement(1,2,3));
-    priorityQueuePush(queue, newQueueElement(10,2,3));
-    priorityQueuePush(queue, newQueueElement(2,2,3));
-    priorityQueuePush(queue, newQueueElement(13,2,3));
+    priorityQueuePush(queue, newQueueElement(1, 2, 3, 0));
+    priorityQueuePush(queue, newQueueElement(10, 2, 3, 0));
+    priorityQueuePush(queue, newQueueElement(2, 2, 3, 0));
+    priorityQueuePush(queue, newQueueElement(13, 2, 3, 0));
 
     assert(priorityQueuePop(queue)->dist == 1);
     assert(priorityQueuePop(queue)->dist == 2);
@@ -211,10 +213,10 @@ void queueBasic()
 
     assert(isEmpty(queue));
 
-    priorityQueuePush(queue, newQueueElement(2,2019, 3));
-    priorityQueuePush(queue, newQueueElement(2,2010, 3));
-    priorityQueuePush(queue, newQueueElement(2,2013, 3));
-    priorityQueuePush(queue, newQueueElement(2,2000, 3));
+    priorityQueuePush(queue, newQueueElement(2, 2019, 3, 0));
+    priorityQueuePush(queue, newQueueElement(2, 2010, 3, 0));
+    priorityQueuePush(queue, newQueueElement(2, 2013, 3, 0));
+    priorityQueuePush(queue, newQueueElement(2, 2000, 3, 0));
 
     assert(!isEmpty(queue));
 
@@ -262,6 +264,10 @@ void dijkstraBasic()
     addEdge(graph, 2, 7, 8, 2003);
     addEdge(graph, 5, 7, 5, 2004);
 
+    assert(bestPath(graph, 0, 7) == NULL);
+
+    removeEdge(graph, 0, 1);
+
     List *lista = bestPath(graph, 0, 7);
 
     Element *elem = lista->begin->next;
@@ -297,4 +303,19 @@ void routeBasic()
     removeRoad(map, "C", "B");
     getRouteDescription(map, 12);
 
+    printf("route OK\n");
+}
+
+void multipleRoutes()
+{
+    Map *map = newMap();
+
+    addRoad(map, "a", "b", 1, 2018);
+    addRoad(map, "b", "d", 1, 2018);
+    addRoad(map, "a", "c", 1, 2018);
+    addRoad(map, "c", "d", 1, 2018);
+
+    assert(!newRoute(map, 1, "a", "d"));
+
+    printf("multiple routes OK\n");
 }

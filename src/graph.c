@@ -10,9 +10,10 @@ const int maxYear = 2;
 
 Graph *newGraph()
 {
+    const int INIT_SIZE = 16;
     Graph *graph = calloc(1, sizeof(Graph));
-//    graph->labels = newHashtable(16, NULL);
-    graph->nodeTable = calloc(10, sizeof(Node*));
+    graph->nodeTable = calloc(INIT_SIZE, sizeof(Node*));
+    graph->tableSize = INIT_SIZE;
     graph->nodeCount = 0;
 
     return graph;
@@ -51,11 +52,10 @@ Node *newNode(const char *label)
     return node;
 }
 
-int *addNode(Graph *graph,
-             const char *label) // TODO zastanowić się czy nie skopiować napisu przed dodaniem do hashtablicy. Bo ktoś może podmienić?
+// tworzy nowy obiekt Node i zwraca jego indeks w grafie. Jeśli nie udało się
+// zaalokować pamięci zwraca NULL
+int *addNode(Graph *graph, const char *label)
 {
-//    if(!isInGraph(graph, label))// TODO getHashtable + insert (2 przejścia niepotrzebnie)
-
     graph->nodeTable[graph->nodeCount] = newNode(label);
     if(graph->nodeTable[graph->nodeCount] == NULL)
         return NULL;
@@ -63,30 +63,29 @@ int *addNode(Graph *graph,
     *graph->nodeTable[graph->nodeCount]->id = graph->nodeCount;
     graph->nodeCount++;
 
-    // TODO resize nodetable
+    if(graph->nodeCount >= graph->tableSize)
+    {
+        graph->tableSize *= 2;
+        graph->nodeTable = realloc(graph->nodeTable, graph->tableSize);
+        if(graph->nodeTable == NULL)
+            return NULL;
+    }
     return graph->nodeTable[graph->nodeCount-1]->id;
 }
 
-// dodaje krawędź pomiędzy istniejącymi wierzchołkami w grafie i zwraca ją
+// dodaje krawędź pomiędzy istniejącymi wierzchołkami w grafie i zwraca true jeśli udało się ją stworzyć
+// i false jeśli nie
 bool addEdge(Graph *graph, int v1, int v2, int length, int builtYear)
 {
-    // TODO kilka zapytań do hashmapy o to samo(może jakaś fajna funkcja)
-    // TODO sprawdzić czy nie istnieje już taka krawędź
-    if(getEdge(graph, v1, v2) != NULL) // jeśli krawędź już jest w grafie to nic nie rób(w module map)
-        return NULL;
+    if (getEdge(graph, v1, v2) != NULL) // krawędź już jest w grafie
+        return false;
 
-    if(v1 >= graph->nodeCount || v2 >= graph->nodeCount) // któregoś z wierzchołków nie ma w grafie
-        return NULL;
-
-//    addNode(graph, v1);
-//    addNode(graph, v2);
-
-//    int *v1 = hashtableGet(graph->labels, v1);
-//    int *v2 = hashtableGet(graph->labels, v2);
+    if (v1 >= graph->nodeCount || v2 >= graph->nodeCount) // któregoś z wierzchołków nie ma w grafie
+        return false;
 
     Edge *newEdge = calloc(1, sizeof(Edge));
 
-    if(newEdge == NULL)
+    if (newEdge == NULL)
         return false;
 
     newEdge->v1 = v1;
@@ -97,15 +96,8 @@ bool addEdge(Graph *graph, int v1, int v2, int length, int builtYear)
     listPushBack(graph->nodeTable[v1]->edges, newEdge, NULL);
     listPushBack(graph->nodeTable[v2]->edges, newEdge, NULL);
 
-    return true; // TODO dodać gdzieś NULL jeśli się coś nie uda
+    return true;
 }
-
-// chyba nie potrzebna ta funkcja
-//bool isInGraph(Graph *graph, int v)
-//{
-//    // TODO poprawić tą funkcję albo usunąć jeśli niepotrzebna
-//    return v < graph->nodeCount; // (hashtableGet(graph->labels, label) != NULL);
-//}
 
 Edge *getEdge(Graph *graph, int v1, int v2)
 {
@@ -166,10 +158,12 @@ List *bestPath(Graph *graph, int v1, int v2) // TODO pokminić czy long longi ni
         bestDistance[i].year = minYear - 1;
         bestDistance[i].nodeId = i;
         bestDistance[i].parent = NULL;
+        bestDistance[i].pathCount = 0;
     }
 
     bestDistance[v1].dist = 0;
     bestDistance[v1].year = maxYear + 1;
+    bestDistance[v1].pathCount = 1;
 
     priorityQueuePush(q, &bestDistance[v1]);
 
@@ -194,16 +188,20 @@ List *bestPath(Graph *graph, int v1, int v2) // TODO pokminić czy long longi ni
                     bestDistance[other].dist = bestDistance[curr->nodeId].dist + ((Edge*)edges->value)->length;
                     bestDistance[other].year = min(bestDistance[curr->nodeId].year, ((Edge*)edges->value)->builtYear);
                     bestDistance[other].parent = newOrientedEdge(edges->value, curr->nodeId);
+                    bestDistance[other].pathCount = bestDistance[curr->nodeId].pathCount;
                     priorityQueuePush(q, &bestDistance[other]);
                 }
                 else if(bestDistance[other].dist == bestDistance[curr->nodeId].dist + ((Edge*)edges->value)->length)
                 {
-                    if(bestDistance[other].year <= min(bestDistance[curr->nodeId].year, ((Edge*)edges->value)->builtYear)) // update bo lepszy rok
+                    if(bestDistance[other].year < min(bestDistance[curr->nodeId].year, ((Edge*)edges->value)->builtYear)) // update bo lepszy rok
                     {
                         bestDistance[other].year = min(bestDistance[curr->nodeId].year, ((Edge*)edges->value)->builtYear);
                         bestDistance[other].parent = newOrientedEdge(edges->value, curr->nodeId);
+                        bestDistance[other].pathCount = bestDistance[curr->nodeId].pathCount;
                         priorityQueuePush(q, &bestDistance[other]);
                     }
+                    if(bestDistance[other].year == min(bestDistance[curr->nodeId].year, ((Edge*)edges->value)->builtYear)) // update bo lepszy rok
+                        bestDistance[other].pathCount += bestDistance[curr->nodeId].pathCount;
                 }
             }
             edges = edges->next;
@@ -215,7 +213,10 @@ List *bestPath(Graph *graph, int v1, int v2) // TODO pokminić czy long longi ni
     for(int i=0; i<graph->nodeCount; i++)
         graph->nodeTable[i]->visited = false;
 
-    if(bestDistance[v2].parent == NULL)
+//    if(bestDistance[v2].parent == NULL)
+//        return NULL;
+
+    if(bestDistance[v2].pathCount != 1)
         return NULL;
 
     // TODO dodać ifa na to czy jest jednoznaczna ścieżka

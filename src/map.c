@@ -55,7 +55,7 @@ void deleteMap(Map *map)
 
 Change *newChange(Element *position, List *path)
 {
-    Change *change = calloc(1, sizeof(change));
+    Change *change = calloc(1, sizeof(Change));
 
     change->positionOfChange = position;
     change->path = path;
@@ -112,9 +112,9 @@ bool addRoad(Map *map, const char *city1, const char *city2, unsigned length, in
 
     if(v1 == NULL || v2 == NULL) // nie udało się stworzyć wierzchołków
         return false;
-
-    if(getEdge(map->graph, *v1, *v2) != NULL) // droga już istnieje
-        return false;
+//
+//    if(getEdge(map->graph, *v1, *v2) != NULL) // droga już istnieje
+//        return false; // TODO sprawdzić dodawanie 2 razy tej samej drogi
 
     return addEdge(map->graph, *v1, *v2, length, builtYear);
 }
@@ -363,7 +363,7 @@ char *concatenate(char *string1, char *string2, int *size, int *allocated)
         string1[*size] = *string2;
         (*size)++;
 
-        if( *size >= *allocated )
+        if( *size+1 >= *allocated )
         {
             (*allocated) *= 2;
             string1 = realloc(string1, *allocated);
@@ -373,6 +373,8 @@ char *concatenate(char *string1, char *string2, int *size, int *allocated)
 
         string2++;
     }
+    string1[*size] = 0;
+//    (*size)++;
 
     return string1;
 }
@@ -382,7 +384,7 @@ char const* getRouteDescription(Map *map, unsigned routeId)
     int size = 0;
     int allocated = 16;
     char *description = calloc(allocated, sizeof(char));
-    description = "";
+//    description = "";
 
     if(map->routeList[routeId] == NULL) // droga nie istnieje
         return description;

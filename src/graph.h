@@ -27,6 +27,7 @@ typedef struct Egde
 typedef struct Graph
 {
     Node **nodeTable;
+    int tableSize;
     int nodeCount;
 } Graph;
 
