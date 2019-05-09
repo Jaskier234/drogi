@@ -46,7 +46,7 @@ bool priorityQueuePush(PriorityQueue *queue, QueueElement *elem)
 {
     if(queue->filled+1 >= queue->size)
     {
-        queue->content = realloc(queue->content, queue->size*2);
+        queue->content = realloc(queue->content, queue->size*2*sizeof(QueueElement));
         queue->size *= 2;
 
         if(queue->content == NULL)

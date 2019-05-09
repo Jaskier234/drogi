@@ -64,7 +64,7 @@ bool listInsert(Element *elem, void *value, Memory *memory);
  * @brief Usuwa element @p elem z listy.
  * @param elem Element do usunięcia.
  * @return Zwraca @p true, gdy uda się usunąć element. Gdy parametr jest wartownikiem
- * zwraca @p false.
+ * zwraca @p false i nic nie robi.
  */
 bool listRemove(Element *elem);
 

@@ -10,11 +10,21 @@
 #define __MAP_H__
 
 #include <stdbool.h>
+#include "graph.h"
 
 /**
  * Struktura przechowująca mapę dróg krajowych.
  */
-typedef struct Map Map;
+//typedef struct Map Map;
+// todo usunąć to
+typedef struct Map
+{
+    Graph *graph;
+    List **routeList;
+    Hashtable **labels;
+    const char **names;
+    int namesSize;
+} Map;
 
 /** @brief Tworzy nową strukturę.
  * Tworzy nową, pustą strukturę niezawierającą żadnych miast, odcinków dróg ani
@@ -136,5 +146,7 @@ bool removeRoad(Map *map, const char *city1, const char *city2);
  * @return Wskaźnik na napis lub NULL, gdy nie udało się zaalokować pamięci.
  */
 char const* getRouteDescription(Map *map, unsigned routeId);
+
+void printRoute(List *route);
 
 #endif /* __MAP_H__ */

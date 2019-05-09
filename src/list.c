@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 
-List *newList(Memory *memory)
+List *newList(Memory *memory) // TODO sprawdzanie czy się udało
 {
     List *list;
     Element *beginElem;
