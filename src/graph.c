@@ -9,7 +9,7 @@
 // TODO long longi
 // TODO przenieść odpowiednie opisy funkcji do graph.h
 
-const int INF = INT_MAX;
+const int INF = INT_MAX/2; // TODO naprawić to
 const int minYear = INT_MIN;
 const int maxYear = INT_MAX;
 
@@ -20,6 +20,7 @@ Graph *newGraph()
     graph->nodes = calloc(INIT_SIZE, sizeof(Node*));
     graph->tableSize = INIT_SIZE;
     graph->nodeCount = 0;
+    graph->ambiguous = newList(NULL);
 
     return graph;
 }
@@ -60,6 +61,7 @@ void deleteGraph(Graph *graph)
         deleteList(graph->nodes[i]->edges, 0);
     }
     free(graph->nodes);
+    deleteList(graph->ambiguous, 0);
     free(graph);
 }
 
@@ -247,95 +249,180 @@ void printGraph(Graph *graph)
 
 // Zwraca listę wierzchołków będącą najkrótszą drogą pomiędzy v1 i v2. Jeśli istnieje wiele takich, to zwraca "najnowszą"
 // Jeśli taka droga nie istnieje lub nie da się jej jednodznacznie ustalić, to zwraca NULL
+
+typedef struct Path
+{
+    int dist;
+    int year;
+    int nodeId;
+    OrientedEdge *parent;
+} Path;
+
+Path pathInit(int dist, int year, int node, OrientedEdge *parent)
+{
+    Path p;
+    p.dist = dist;
+    p.year = year;
+    p.nodeId = node;
+    p.parent = parent;
+
+    return p;
+}
+
+// 1 - jeśli path1 jest lepsza od path2
+// 0 - takie same
+int compare(void *a, void *b)
+{
+    Path *path1 = a;
+    Path *path2 = b;
+
+    if(path1->dist == path2->dist)
+    {
+        if(path1->year == path2->year)
+            return 0;
+        if(path1->year < path2->year)
+            return -1;
+        return 1;
+    }
+    return ((path1->dist < path2->dist)?(1):(-1)); // 1 - path1 lepsza
+}
+
+
+
 List *bestPath(Graph *graph, int v1, int v2)
 {
-    PriorityQueue *q = newPriorityQueue();
+    PriorityQueue *q = newPriorityQueue(compare);
 
-    QueueElement *bestDistance = calloc(graph->nodeCount, sizeof(QueueElement));
+    Path *bestPath = calloc(graph->nodeCount, sizeof(Path));
+    Path *secondPath = calloc(graph->nodeCount, sizeof(Path));
 
     for(int i=0; i<graph->nodeCount; i++)
     {
-        bestDistance[i].dist = INF;
-        bestDistance[i].year = minYear;
-        bestDistance[i].nodeId = i;
-        bestDistance[i].parent = NULL;
-        bestDistance[i].pathCount = 0;
+          bestPath[i] = pathInit(INF, minYear, i, NULL);
+          secondPath[i] = pathInit(INF, minYear, i, NULL);
     }
 
-    bestDistance[v1].dist = 0;
-    bestDistance[v1].year = maxYear;
-    bestDistance[v1].pathCount = 1;
+    bestPath[v1] = pathInit(0, maxYear, v1, NULL);
+//    secondPath[v1] = pathInit(0, maxYear, v1, NULL);
 
-    priorityQueuePush(q, &bestDistance[v1]);
+    priorityQueuePush(q, &bestPath[v1]);
 
     while(!isEmpty(q))
     {
-        QueueElement *curr = priorityQueuePop(q);
-        graph->nodes[curr->nodeId]->visited = true;
-        Element *edges = graph->nodes[curr->nodeId]->edges->begin->next;
+//        QueueElement *curr = priorityQueuePop(q);
+        Path *n = priorityQueuePop(q);
+        int curr = n->nodeId;
 
-        while(edges != graph->nodes[curr->nodeId]->edges->end)
+        if(graph->nodes[curr]->visited && curr != v1)
+            continue;
+
+        graph->nodes[curr]->visited = true;
+//        Element *edges = graph->nodes[curr]->edges->begin->next;
+
+        foreach(it, graph->nodes[curr]->edges)
         {
-            int other;
-            if(curr->nodeId == ((Edge*)edges->value)->v1)
-                other = ((Edge*)edges->value)->v2;
-            else
-                other = ((Edge*)edges->value)->v1;
+            Edge *edge = it->value;
+            int other = otherNodeId(edge, curr);
 
-            if(graph->nodes[other]->visited == false)
+            if (graph->nodes[other]->visited == false)
             {
-                if(bestDistance[other].dist > bestDistance[curr->nodeId].dist + ((Edge*)edges->value)->length) // update bo odległość jest lepsza
+                Path path1 = pathInit(bestPath[curr].dist + edge->length, min(bestPath[curr].year, edge->builtYear),
+                                      other, newOrientedEdge(edge, curr));
+                Path path2 = pathInit(secondPath[curr].dist + edge->length, min(secondPath[curr].year, edge->builtYear),
+                                      other, newOrientedEdge(edge, curr));
+
+                if (compare(&path1, &bestPath[other]) >= 0)
                 {
-                    bestDistance[other].dist = bestDistance[curr->nodeId].dist + ((Edge*)edges->value)->length;
-                    bestDistance[other].year = min(bestDistance[curr->nodeId].year, ((Edge*)edges->value)->builtYear);
-                    bestDistance[other].parent = newOrientedEdge(edges->value, curr->nodeId);
-                    bestDistance[other].pathCount = bestDistance[curr->nodeId].pathCount;
-                    priorityQueuePush(q, &bestDistance[other]);
+                    secondPath[other] = bestPath[other];
+                    bestPath[other] = path1;
+                    priorityQueuePush(q, &bestPath[other]); // TODO wrzucać na kolejkę, tylko gdy poprawimy wynik
                 }
-                else if(bestDistance[other].dist == bestDistance[curr->nodeId].dist + ((Edge*)edges->value)->length)
-                {
-                    if(bestDistance[other].year < min(bestDistance[curr->nodeId].year, ((Edge*)edges->value)->builtYear)) // update bo lepszy rok
-                    {
-                        bestDistance[other].year = min(bestDistance[curr->nodeId].year, ((Edge*)edges->value)->builtYear);
-                        bestDistance[other].parent = newOrientedEdge(edges->value, curr->nodeId);
-                        bestDistance[other].pathCount = bestDistance[curr->nodeId].pathCount;
-                        priorityQueuePush(q, &bestDistance[other]);
-                    }
-                    if(bestDistance[other].year == min(bestDistance[curr->nodeId].year, ((Edge*)edges->value)->builtYear)) // update bo lepszy rok
-                        bestDistance[other].pathCount += bestDistance[curr->nodeId].pathCount;
-                }
+                else if (compare(&path1, &secondPath[other]) >= 0)
+                    secondPath[other] = path1;
+
+//                if (compare(&path2, &bestPath[other]) >= 0)
+//                {
+//                    secondPath[other] = bestPath[other];
+//                    bestPath[other] = path2;
+//                    priorityQueuePush(q, &bestPath[other]);
+//                }
+                if (compare(&path2, &secondPath[other]) >= 0)
+                    secondPath[other] = path2;
+
             }
-            edges = edges->next;
         }
     }
+
+//        while(edges != graph->nodes[curr->nodeId]->edges->end)
+//        {
+//            int other;
+//            if(curr->nodeId == ((Edge*)edges->value)->v1)
+//                other = ((Edge*)edges->value)->v2;
+//            else
+//                other = ((Edge*)edges->value)->v1;
+//
+//            if(graph->nodes[other]->visited == false)
+//            {
+//                if(bestPath[other].dist > bestPath[curr->nodeId].dist + ((Edge*)edges->value)->length) // update bo odległość jest lepsza
+//                {
+//                    bestPath[other].dist = bestPath[curr->nodeId].dist + ((Edge*)edges->value)->length;
+//                    bestPath[other].year = min(bestPath[curr->nodeId].year, ((Edge*)edges->value)->builtYear);
+//                    bestPath[other].parent = newOrientedEdge(edges->value, curr->nodeId);
+////                    bestDistance[other].pathCount = bestDistance[curr->nodeId].pathCount;
+//                    priorityQueuePush(q, &bestPath[other]);
+//                }
+//                else if(bestPath[other].dist == bestPath[curr->nodeId].dist + ((Edge*)edges->value)->length)
+//                {
+//                    if(bestPath[other].year < min(bestPath[curr->nodeId].year, ((Edge*)edges->value)->builtYear)) // update bo lepszy rok
+//                    {
+//                        bestPath[other].year = min(bestPath[curr->nodeId].year, ((Edge*)edges->value)->builtYear);
+//                        bestPath[other].parent = newOrientedEdge(edges->value, curr->nodeId);
+////                        bestDistance[other].pathCount = bestDistance[curr->nodeId].pathCount;
+//                        priorityQueuePush(q, &bestPath[other]);
+//                    }
+//                    if(bestPath[other].year == min(bestPath[curr->nodeId].year, ((Edge*)edges->value)->builtYear)) // update bo lepszy rok
+////                        bestDistance[other].pathCount += bestDistance[curr->nodeId].pathCount;
+//                }
+//            }
+//            edges = edges->next;
+//        }
+//    }
 
     for(int i=0; i<graph->nodeCount; i++)
         graph->nodes[i]->visited = false;
 
-    if(bestDistance[v2].pathCount != 1 || bestDistance[v2].parent == NULL)
-    {
-        deletePriorityQueue(q);
-        for(int i=0; i<graph->nodeCount; i++)
-            if(bestDistance[i].parent != NULL && bestDistance[i].parent->isInPath == false)
-                free(bestDistance[i].parent);
-        free(bestDistance);
+
+    // TODO zwalnianie
+    if(secondPath[v2].dist == bestPath[v2].dist && secondPath[v2].year == bestPath[v2].year && bestPath[v2].dist != INF)
+        return graph->ambiguous;
+
+    if(bestPath[v2].parent == NULL) // brak ścieżki
         return NULL;
-    }
+
+//    if(bestPath[v2].pathCount != 1 || bestPath[v2].parent == NULL)
+//    {
+//        deletePriorityQueue(q);
+//        for(int i=0; i<graph->nodeCount; i++)
+//            if(bestPath[i].parent != NULL && bestPath[i].parent->isInPath == false)
+//                free(bestPath[i].parent);
+//        free(bestPath);
+//        return NULL;
+//    }
 
     List *path = newList(NULL);
 
-    while(bestDistance[v2].parent != NULL)
+    while(bestPath[v2].parent != NULL)
     {
-        listInsert(path->begin, bestDistance[v2].parent, NULL);
-        bestDistance[v2].parent->isInPath = true;
-        v2 = bestDistance[v2].parent->v;
+        listInsert(path->begin, bestPath[v2].parent, NULL);
+        bestPath[v2].parent->isInPath = true;
+        v2 = bestPath[v2].parent->v;
     }
 
     deletePriorityQueue(q);
     for(int i=0; i<graph->nodeCount; i++)
-        if(bestDistance[i].parent != NULL && bestDistance[i].parent->isInPath == false)
-            free(bestDistance[i].parent);
-    free(bestDistance);
+        if(bestPath[i].parent != NULL && bestPath[i].parent->isInPath == false)
+            free(bestPath[i].parent);
+    free(bestPath);
 
     return path;
 }

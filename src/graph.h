@@ -37,6 +37,7 @@ typedef struct Graph
     Node **nodes; ///< Tablica wskaźników na wierzchołki grafu
     int tableSize; ///< Rozmiar tablicy nodes(ilość zaalokowanej pamięci).
     int nodeCount; ///< Liczba wierzchołków w grafie.
+    List *ambiguous; ///< do bestPath
 } Graph;
 
 typedef struct OrientedEdge

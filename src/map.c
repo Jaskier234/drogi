@@ -205,6 +205,9 @@ bool newRoute(Map *map, unsigned routeId, const char *city1, const char *city2)
 
     map->routeList[routeId] = bestPath(map->graph, *v1, *v2);
 
+    if(map->routeList[routeId] == map->graph->ambiguous)
+        map->routeList[routeId] = NULL;
+
     if(map->routeList[routeId] == NULL)
         return false;
 
@@ -275,6 +278,9 @@ bool extendRoute(Map *map, unsigned routeId, const char *city)
     map->graph->nodes[firstCity]->visited =false;
     List *path1 = bestPath(map->graph, *v, firstCity);
 
+    if(path1 == map->graph->ambiguous)
+        path1 = NULL; // TODO naprawić najbardziej złożony problem w zadaniu
+
     int pathLength1 = 0;
     int pathYear1 = maxYear;
     if(path1 != NULL)
@@ -292,8 +298,11 @@ bool extendRoute(Map *map, unsigned routeId, const char *city)
     setRouteVisited(map, routeId);
     List *path2 = bestPath(map->graph, lastCity, *v);
 
+    if(path2 == map->graph->ambiguous)
+        path2 = NULL; // TODO naprawić najbardziej złożony problem w zadaniu
+
     int pathLength2 = 0;
-    int pathYear2 = maxYear + 1;
+    int pathYear2 = maxYear;
     if(path2 != NULL)
     {
         Element *elem2 = path2->begin->next;
@@ -309,6 +318,8 @@ bool extendRoute(Map *map, unsigned routeId, const char *city)
     if(path1 == NULL && path2 == NULL) return false;
     if(path2 == NULL) listInsertList(map->routeList[routeId]->begin, path1);
     else if(path1 == NULL) listInsertList(map->routeList[routeId]->end->prev, path2);
+    else if( pathLength1 == pathLength2 && pathYear1 == pathYear2 )
+        return false;
     else if(pathLength1 < pathLength2 || (pathLength1 == pathLength2 && pathYear1 > pathLength2))
         listInsertList(map->routeList[routeId]->begin, path1);
     else
@@ -320,6 +331,7 @@ bool extendRoute(Map *map, unsigned routeId, const char *city)
     return true;
 }
 
+// TODO do grafu
 bool eqEdges(Edge *edge1, Edge *edge2)
 {
     if(edge1->builtYear != edge2->builtYear)
@@ -377,6 +389,9 @@ bool removeRoad(Map *map, const char *city1, const char *city2)
                 map->graph->nodes[otherCityId]->visited = false;
                 List *path = bestPath(map->graph, road->v, otherCityId);
 
+                if(path == map->graph->ambiguous)
+                    path = NULL;
+
                 if(path != NULL) // dodajemy do Change
                 {
                     listPushBack(changes, newChange(elem->prev, path), NULL);
@@ -397,7 +412,9 @@ bool removeRoad(Map *map, const char *city1, const char *city2)
                     }
                     deleteList(changes, 0);
 //                    changes = NULL;
-                    addEdge(map->graph, *v1, *v2, removedEdge->length, removedEdge->builtYear);
+//                    addEdge(map->graph, *v1, *v2, removedEdge->length, removedEdge->builtYear);
+                    listPushBack(map->graph->nodes[removedEdge->v1]->edges, removedEdge, NULL);
+                    listPushBack(map->graph->nodes[removedEdge->v2]->edges, removedEdge, NULL);
                     return false;
                 }
 
