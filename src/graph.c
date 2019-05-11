@@ -353,41 +353,6 @@ List *bestPath(Graph *graph, int v1, int v2)
         }
     }
 
-//        while(edges != graph->nodes[curr->nodeId]->edges->end)
-//        {
-//            int other;
-//            if(curr->nodeId == ((Edge*)edges->value)->v1)
-//                other = ((Edge*)edges->value)->v2;
-//            else
-//                other = ((Edge*)edges->value)->v1;
-//
-//            if(graph->nodes[other]->visited == false)
-//            {
-//                if(bestPath[other].dist > bestPath[curr->nodeId].dist + ((Edge*)edges->value)->length) // update bo odległość jest lepsza
-//                {
-//                    bestPath[other].dist = bestPath[curr->nodeId].dist + ((Edge*)edges->value)->length;
-//                    bestPath[other].year = min(bestPath[curr->nodeId].year, ((Edge*)edges->value)->builtYear);
-//                    bestPath[other].parent = newOrientedEdge(edges->value, curr->nodeId);
-////                    bestDistance[other].pathCount = bestDistance[curr->nodeId].pathCount;
-//                    priorityQueuePush(q, &bestPath[other]);
-//                }
-//                else if(bestPath[other].dist == bestPath[curr->nodeId].dist + ((Edge*)edges->value)->length)
-//                {
-//                    if(bestPath[other].year < min(bestPath[curr->nodeId].year, ((Edge*)edges->value)->builtYear)) // update bo lepszy rok
-//                    {
-//                        bestPath[other].year = min(bestPath[curr->nodeId].year, ((Edge*)edges->value)->builtYear);
-//                        bestPath[other].parent = newOrientedEdge(edges->value, curr->nodeId);
-////                        bestDistance[other].pathCount = bestDistance[curr->nodeId].pathCount;
-//                        priorityQueuePush(q, &bestPath[other]);
-//                    }
-//                    if(bestPath[other].year == min(bestPath[curr->nodeId].year, ((Edge*)edges->value)->builtYear)) // update bo lepszy rok
-////                        bestDistance[other].pathCount += bestDistance[curr->nodeId].pathCount;
-//                }
-//            }
-//            edges = edges->next;
-//        }
-//    }
-
     for(int i=0; i<graph->nodeCount; i++)
         graph->nodes[i]->visited = false;
 
