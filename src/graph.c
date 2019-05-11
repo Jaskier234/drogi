@@ -335,7 +335,7 @@ List *bestPath(Graph *graph, int v1, int v2)
                 {
                     secondPath[other] = bestPath[other];
                     bestPath[other] = path1;
-                    priorityQueuePush(q, &bestPath[other]); // TODO wrzucać na kolejkę, tylko gdy poprawimy wynik
+                    priorityQueuePush(q, &bestPath[other]);
                 }
                 else if (compare(&path1, &secondPath[other]) >= 0)
                     secondPath[other] = path1;

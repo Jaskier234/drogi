@@ -279,7 +279,7 @@ bool extendRoute(Map *map, unsigned routeId, const char *city)
     List *path1 = bestPath(map->graph, *v, firstCity);
 
     if(path1 == map->graph->ambiguous)
-        path1 = NULL; // TODO naprawić najbardziej złożony problem w zadaniu
+        return false;
 
     int pathLength1 = 0;
     int pathYear1 = maxYear;
@@ -299,7 +299,7 @@ bool extendRoute(Map *map, unsigned routeId, const char *city)
     List *path2 = bestPath(map->graph, lastCity, *v);
 
     if(path2 == map->graph->ambiguous)
-        path2 = NULL; // TODO naprawić najbardziej złożony problem w zadaniu
+        return false;
 
     int pathLength2 = 0;
     int pathYear2 = maxYear;
@@ -445,7 +445,7 @@ bool removeRoad(Map *map, const char *city1, const char *city2)
 }
 
 // Konwertuje liczbę na napis
-char *intToString(int a)
+char *intToString(int a) // TODO naprawić dla 0
 {
     char *string = calloc(20, sizeof(char));
     int size=0;
