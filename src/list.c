@@ -23,9 +23,12 @@ List *newList(Memory *memory)
 
     if(list == NULL || beginElem == NULL || endElem == NULL)
     {
-        free(list);
-        free(beginElem);
-        free(endElem);
+        if(memory == NULL) // jeśli używamy memory, pamięć zostanie zwolniona później
+        {
+            free(list);
+            free(beginElem);
+            free(endElem);
+        }
         return NULL;
     }
 

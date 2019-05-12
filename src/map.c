@@ -19,7 +19,7 @@
 /**
  * Struktura przechowująca zmiany w strukturze dróg krajowych.
  * W funkcji @ref removeRoad zmiany najpierw dodawane są do struktury
- * @ref Change, a dopiero gdy wszystkie okarzą się poprawne, są dodawane do
+ * @ref Change, a dopiero gdy wszystkie okażą się poprawne, są dodawane do
  * struktury dróg.
  */
 typedef struct Change

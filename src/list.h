@@ -1,5 +1,6 @@
 /** @file
- * Interfejs dwukierunkowej listy generycznej
+ * Interfejs dwukierunkowej listy generycznej. Lista przyjmuje wskaźnik
+ * na obiekt dowolnego typu.
  */
 
 #ifndef DROGI_LIST_H
