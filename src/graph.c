@@ -7,7 +7,6 @@
 #include <stdio.h>
 
 // TODO long longi
-// TODO przenieść odpowiednie opisy funkcji do graph.h
 
 const int INF = INT_MAX/2; // TODO naprawić to
 const int minYear = INT_MIN;
@@ -54,7 +53,8 @@ void deleteGraph(Graph *graph)
 
             free(edge);
         }
-        deleteList(graph->nodes[i]->edges, 0); //todo chyba wystarczy del = true
+        deleteList(graph->nodes[i]->edges, false);
+        free(graph->nodes[i]);
     }
     free(graph->nodes);
     deleteList(graph->ambiguous, 0);
@@ -352,7 +352,6 @@ List *bestPath(Graph *graph, int v1, int v2)
 
     deletePriorityQueue(q);
 
-    // TODO zwalnianie
     if(secondPath[v2].dist == bestPath[v2].dist && secondPath[v2].year == bestPath[v2].year && bestPath[v2].dist != INF)
     {
         free(bestPath);

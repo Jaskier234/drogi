@@ -67,6 +67,7 @@ void deleteMap(Map *map)
     {
         deleteList(map->routeList[i], true);
     }
+    free(map->routeList);
 
     deleteHashtable(map->labels);
 
@@ -152,17 +153,25 @@ bool addRoad(Map *map, const char *city1, const char *city2, unsigned length, in
     if(strcmp(city1, city2) == 0) // to samo miasto na wejściu
         return false;
 
-    int *v1 = getCity(map, city1);
-    int *v2 = getCity(map, city2);
-
-    if(v1 == NULL || v2 == NULL) // nie udało się stworzyć wierzchołków
-        return false;
-
     if(length == 0)
         return false;
 
     if(builtYear == 0)
         return false;
+
+    int *v1 = getCity(map, city1);
+    if(v1 == NULL)
+        return false;
+
+    int *v2 = getCity(map, city2);
+    if(v2 == NULL)
+        return false;
+
+//    if(v1 == NULL || v2 == NULL) // nie udało się stworzyć wierzchołków
+//    {
+//
+//        return false;
+//    }
 
     return addEdge(map->graph, *v1, *v2, length, builtYear);
 }
