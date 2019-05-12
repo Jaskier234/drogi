@@ -415,9 +415,8 @@ bool removeRoad(Map *map, const char *city1, const char *city2)
                     Element *elem = changes->begin->next;
                     while(elem != changes->end)
                     {
-//                        Change *change = elem->value;
-
-//                        listInsertList(change->positionOfChange, change->path);
+                        Change *change = elem->value;
+                        deleteList(change->path, true);
 
                         free(elem->value);
 
