@@ -65,6 +65,9 @@ OrientedEdge *newOrientedEdge(Edge *edge, int v)
 {
     OrientedEdge *orientedEdge = calloc(1, sizeof(OrientedEdge));
 
+    if(orientedEdge == NULL)
+        return NULL;
+
     orientedEdge->edge = edge;
     orientedEdge->v = v;
     orientedEdge->isInPath = false;
