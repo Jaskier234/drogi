@@ -282,6 +282,8 @@ List *bestPath(Graph *graph, int v1, int v2)
 {
     PriorityQueue *q = newPriorityQueue(compare);
 
+    List *orientedEdges = newList(NULL);
+
     Path *bestPath = calloc(graph->nodeCount, sizeof(Path));
     Path *secondPath = calloc(graph->nodeCount, sizeof(Path));
 
@@ -327,6 +329,9 @@ List *bestPath(Graph *graph, int v1, int v2)
                 Path path2 = pathInit(secondPath[curr].dist + edge->length, min(secondPath[curr].year, edge->builtYear),
                                       other, newOrientedEdge(edge, curr));
 
+                listPushBack(orientedEdges, path1.parent, NULL);
+                listPushBack(orientedEdges, path2.parent, NULL);
+
                 if (compare(&path1, &bestPath[other]) >= 0)
                 {
                     secondPath[other] = bestPath[other];
@@ -359,6 +364,7 @@ List *bestPath(Graph *graph, int v1, int v2)
     {
         free(bestPath);
         free(secondPath);
+        deleteList(orientedEdges, true);
         return graph->ambiguous;
     }
 
@@ -366,6 +372,7 @@ List *bestPath(Graph *graph, int v1, int v2)
     {
         free(bestPath);
         free(secondPath);
+        deleteList(orientedEdges, true);
         return NULL;
     }
 
@@ -388,9 +395,17 @@ List *bestPath(Graph *graph, int v1, int v2)
         v2 = bestPath[v2].parent->v;
     }
 
-    for(int i=0; i<graph->nodeCount; i++)
-        if(bestPath[i].parent != NULL && bestPath[i].parent->isInPath == false)
-            free(bestPath[i].parent);
+//    for(int i=0; i<graph->nodeCount; i++)
+//        if(bestPath[i].parent != NULL && bestPath[i].parent->isInPath == false)
+//            free(bestPath[i].parent);
+
+    foreach(it, orientedEdges)
+    {
+        OrientedEdge *edge = it->value;
+        if(edge != NULL && edge->isInPath == false)
+            free(edge);
+    }
+    deleteList(orientedEdges, false);
 
     free(bestPath);
     free(secondPath);
