@@ -20,8 +20,9 @@
  */
 typedef struct Element
 {
-    struct Element *prev, *next;
-    void *value;
+    struct Element *prev; ///< Wskaźnik na następny element listy.
+    struct Element *next; ///< Wskaźnik na poprzedni element listy.
+    void *value; ///< Wskaźnik na obiekt przechowywany w liście.
 } Element;
 
 /**
@@ -31,7 +32,6 @@ typedef struct List
 {
     Element *begin; ///< Pusty element na początku listy pełniący rolę wartowników
     Element *end; ///< Pusty element na końcu listy pełniący rolę wartowników
-    int size;
 } List;
 
 /**
@@ -46,7 +46,7 @@ List *newList(Memory *memory);
  * @brief Zwalnia pamięć po liście.
  * @param list Wskaźnik na usuwaną listę.
  * @param del Jeśli jest true, to przy usuwaniu listy zostanie zwolniona
- * pamięć pod wskaźnikiem przechowywanym w liście. Jeśli false zostanie zwolniona
+ * pamięć pod wskaźnikiem przechowywanym w liście(@p value). Jeśli false zostanie zwolniona
  * tylko pamięć zaalokowana na listę.
  */
 void deleteList(List *list, bool del);
@@ -87,7 +87,12 @@ bool listPushBack(List *list, void *value, Memory *memory);
  */
 void listInsertList(Element *elem, List *list);
 
-// O(n)
+/**
+ * @brief Liczy rozmiar listy.
+ * Czas działania tej funkcji jest proporcjonalny to rozmiaru listy.
+ * @param list Lista, której długość ma zostać obliczona.
+ * @return Rozmiar listy.
+ */
 int listSize(List *list);
 
 #endif //DROGI_LIST_H

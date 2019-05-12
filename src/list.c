@@ -1,5 +1,4 @@
 #include "list.h"
-#include "memory.h"
 
 #include <stdlib.h>
 
@@ -28,12 +27,10 @@ List *newList(Memory *memory) // TODO sprawdzanie czy się udało
 
     list->begin = beginElem;
     list->end = endElem;
-    list->size = 0;
 
     return list;
 }
 
-// pamięć pod wskaźnikiem przekazanym do listy zostanie zwolniona
 void deleteList(List *list, bool del)
 {
     if(list == NULL)
@@ -44,8 +41,10 @@ void deleteList(List *list, bool del)
     do
     {
         Element *next = iter->next;
+
         if(del)
             free(iter->value);
+
         free(iter);
         iter = next;
     }
@@ -101,10 +100,8 @@ int listSize(List *list)
         return 0;
 
     int size = 0;
-    Element *e = list->begin->next;
-    while(e->next != NULL)
+    foreach(it, list)
     {
-        e = e->next;
         size++;
     }
     return size;
@@ -115,7 +112,6 @@ bool listPushBack(List *list, void *value, Memory *memory)
     return listInsert(list->end->prev, value, memory);
 }
 
-// Dodaje do listy wszystkie elementy drugiej listy
 void listInsertList(Element *elem, List *list)
 {
     Element *next = elem->next;
