@@ -62,6 +62,8 @@ bool listInsert(Element *elem, void *value, Memory *memory);
 
 /**
  * @brief Usuwa element @p elem z listy.
+ * Zwalnia tylko pamięć zaalokowaną na Element listy. Pamięć pod @p elem->value
+ * nie jest zwalniana.
  * @param elem Element do usunięcia.
  * @return Zwraca @p true, gdy uda się usunąć element. Gdy parametr jest wartownikiem
  * zwraca @p false i nic nie robi.

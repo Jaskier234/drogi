@@ -2,7 +2,7 @@
 
 #include <stdlib.h>
 
-List *newList(Memory *memory) // TODO sprawdzanie czy się udało
+List *newList(Memory *memory)
 {
     List *list;
     Element *beginElem;
@@ -19,6 +19,14 @@ List *newList(Memory *memory) // TODO sprawdzanie czy się udało
         list = getMemory(memory, sizeof(List));
         beginElem = getMemory(memory, sizeof(Element));
         endElem = getMemory(memory, sizeof(Element));
+    }
+
+    if(list == NULL || beginElem == NULL || endElem == NULL)
+    {
+        free(list);
+        free(beginElem);
+        free(endElem);
+        return NULL;
     }
 
     beginElem->next = endElem;
@@ -50,14 +58,13 @@ void deleteList(List *list, bool del)
     }
     while(iter != list->end);
 
-     free(list->end);
+    free(list->end);
 
     free(list);
 }
 
 bool listInsert(Element *elem, void *value, Memory *memory)
 {
-
     Element *newElem;
     if(memory == NULL)
         newElem = calloc(1, sizeof(Element));
@@ -76,7 +83,6 @@ bool listInsert(Element *elem, void *value, Memory *memory)
     newElem->prev = elem;
 
     newElem->value = value;
-
 
     return true;
 }
