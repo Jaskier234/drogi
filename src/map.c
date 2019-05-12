@@ -41,10 +41,17 @@ Map *newMap(void)
     map->routeList = calloc(1000, sizeof(List*));
     map->labels = newHashtable(INIT_SIZE, newMemory());
     map->namesSize = INIT_SIZE;
-    map->names = calloc(INIT_SIZE, sizeof(char*));
+    map->names = calloc(INIT_SIZE, sizeof(char*)); // TODO może dodać wektor?
 
     if(map->graph == NULL || map->routeList == NULL || map->labels == NULL || map->names == NULL)
+    {
+        deleteGraph(map->graph);
+        free(map->routeList);
+        deleteHashtable(map->labels);
+        free(map->names);
+        free(map);
         return NULL;
+    }
 
     return map;
 }
@@ -58,20 +65,17 @@ void deleteMap(Map *map)
 
     for(int i=0; i<1000; i++)
     {
-        if(map->routeList[i] != NULL)
-        {
-            Element *elem = map->routeList[i]->begin->next;
-            while(elem != map->routeList[i]->end)
-            {
-                free(elem->value);
-
-                elem = elem->next;
-            }
-        }
-        deleteList(map->routeList[i], 0);
+        deleteList(map->routeList[i], true);
     }
 
     deleteHashtable(map->labels);
+
+    for(int i=0; i<map->namesSize; i++)
+    {
+        free(map->names[i]);
+    }
+    free(map->names);
+
     free(map);
 }
 

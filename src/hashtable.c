@@ -48,6 +48,7 @@ Hashtable **newHashtable(int size, Memory *memory)
 
 void deleteHashtableContent(Hashtable **hash)
 {
+    // TODO obsługa przypadku, gdy hash jest NULLem
     deleteMemory((*hash)->memory);
     free((*hash)->table);
     free(*hash);
