@@ -6,7 +6,7 @@
 #ifndef DROGI_GRAPH_H
 #define DROGI_GRAPH_H
 
-#include "hashtable.h"
+//#include "hashtable.h"
 #include "list.h"
 #include "vector.h"
 
@@ -113,6 +113,14 @@ Edge *getEdge(Graph *graph, int v1, int v2);
  * nie usunięto krawędzi(np. w grafie jej nie było).
  */
 bool removeEdge(Graph *graph, int v1, int v2);
+
+/**
+ * @brief Porównuje dwie krawędzie.
+ * @param edge1 Krawędź, która będzie porównywana.
+ * @param edge2 Krawędź, która będzie porównywana.
+ * @return @p true jeśli krawędzie są równe lub @p false, gdy są różne.
+ */
+bool eqEdges(Edge *edge1, Edge *edge2);
 
 List *bestPath(Graph *graph, int v1, int v2);
 

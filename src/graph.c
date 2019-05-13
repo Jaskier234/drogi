@@ -227,6 +227,20 @@ bool removeEdge(Graph *graph, int v1, int v2)
     return true;
 }
 
+// TODO do grafu
+bool eqEdges(Edge *edge1, Edge *edge2)
+{
+    if(edge1->builtYear != edge2->builtYear)
+        return false;
+
+    if(edge1->length != edge2->length)
+        return false;
+
+    if( (edge1->v1 == edge2->v1 && edge1->v2 == edge2->v2) || (edge1->v1 == edge2->v2 && edge1->v2 == edge2->v1) )
+        return true;
+    return false;
+}
+
 int min(int a, int b)
 {
     return (a<b?a:b);

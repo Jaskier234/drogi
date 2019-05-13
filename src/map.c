@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include "map.h"
 
 #include <stdlib.h>
@@ -6,16 +7,18 @@
 
 #include "graph.h"
 #include "list.h"
-//#include "vector.h"
+#include "hashtable.h"
 
-//typedef struct Map
-//{
-//    Graph *graph;
-//    List **routeList;
-//    Hashtable **labels;
-//    const char **names;
-//    int namesSize;
-//} Map;
+typedef struct Map
+{
+    Graph *graph; ///< Graf przechowujący inforamcje o połączeniach drogowych
+    ///< w mapie
+    List **routeList; ///< Lista dróg krajowych. Elementem listy jest
+    ///< OrientedEdge
+    Hashtable **labels; ///< Tablica haszująca, przechowująca nazwy miast.
+    ///< Zwraca indeks wierzchołka, który reprezentuje miasto o podanej nazwie.
+    Vector *names; ///< Wektor przechowujący nazwy maist.
+} Map;
 
 /**
  * Struktura przechowująca zmiany w strukturze dróg krajowych.
@@ -23,11 +26,6 @@
  * @ref Change, a dopiero gdy wszystkie okażą się poprawne, są dodawane do
  * struktury dróg.
  */
-typedef struct Change
-{
-    Element *positionOfChange; ///< element litsy dróg krajowych po którym należy wstawić nowe krawędzie drogi
-    List *path; ///< lista krawędzi, które należy wstawić do drogi
-} Change;
 
 Map *newMap(void)
 {
@@ -82,11 +80,20 @@ void deleteMap(Map *map)
 
 /**
  * @brief Inicjalizuje i zwraca instancję struktury @ref Change
- * @param position - element litsy dróg krajowych po którym należy wstawić nowe krawędzie drogi
+ * @param position - element litsy dróg krajowych po którym należy wstawić nowe
+ * krawędzie drogi
  * @param path - lista krawędzi, które należy wstawić do drogi
  * @return wzkaźnik na strukturę Change, lub NULL, gdy nie udało się zaalokować pamięci
  */
-Change *newChange(Element *position, List *path)
+
+typedef struct Change
+{
+    Element *positionOfChange; ///< element litsy dróg krajowych po którym należy
+    ///< wstawić nowe krawędzie drogi
+    List *path; ///< lista krawędzi, które należy wstawić do drogi
+} Change;
+
+static Change *newChange(Element *position, List *path)
 {
     Change *change = calloc(1, sizeof(Change));
 
@@ -96,25 +103,28 @@ Change *newChange(Element *position, List *path)
     return change;
 }
 
-// Tworzy kopię napisu i zwraca wskaźnik na nią
-char *strdup(const char *s)
-{
-    char* p = calloc(strlen(s)+1, sizeof(char));
-    if (p) strcpy(p, s);
-    return p;
-}
+// todo moduł ext_string
 
-// zwraca indeks miasta o podanej nazwie, a jeśli takie miasto nie istnieje to je tworzy
-// zwraca NULL, gdy nie udało się zaalokować pamięci
-// zakłada poprawność nazwy miasta
-int *getCity(Map *map, const char *city)
+// Zwraca indeks miasta o podanej nazwie, a jeśli takie miasto nie istnieje to je tworzy.
+// Zwraca NULL, gdy nie udało się zaalokować pamięci.
+// Zakłada poprawność nazwy miasta.
+/**
+ * Zwraca indeks miasta o podanej nazwie, a jeśli takie miasto nie istnieje
+ * to je tworzy.
+ * @param map Mapa, z której zostanie zwrócony indeks miasta lub zostanie
+ * utworzone nowe miasto.
+ * @param city nazwa miasta.
+ * @return Wskaźnik na indeks miasta lub NULL jeśli nie udało się zaalokować
+ * pamięci.
+ */
+static int *getCity(Map *map, const char *city)
 {
     int *v = hashtableGet(map->labels, city);
 
     if( v != NULL) // miasto już istnieje
         return v;
 
-    char *cityCp = strdup(city); // TODO usunąć duplikat nazwy z pamięci
+    char *cityCp = strdup(city);
     v = addNode(map->graph);
     if(v == NULL) // nie udało się zaalokować
     {
@@ -122,13 +132,13 @@ int *getCity(Map *map, const char *city)
         return NULL;
     }
 
-//    map->names[*v] = cityCp;
     vectorPushBack(map->names, cityCp);
 
     if(hashtableInsert(map->labels, cityCp, v))
         return v;
     free(cityCp);
     return NULL; // nie udało się dodać do hashtable // trzeba usunąć wierzchołek z grafu
+    // todo usuwanie ostatniego wierzchołka
 }
 
 // Sprawdza poprawność nazwy miasta
@@ -252,15 +262,7 @@ void setRouteVisited(Map *map, unsigned routeId)
         Node *node = map->graph->nodes->tab[edge->v];
         node->visited = true;
     }
-//    Element *elem = map->routeList[routeId]->begin->next;
-//    while(elem != map->routeList[routeId]->end)
-//    {
-//        int nodeId = ((OrientedEdge*)elem->value)->v;
-//
-//        map->graph->nodes[nodeId]->visited = true;
-//
-//        elem = elem->next;
-//    }
+
     int last = lastCityId(map, routeId);
     Node *node = map->graph->nodes->tab[last];
     node->visited = true;
@@ -283,12 +285,11 @@ bool extendRoute(Map *map, unsigned routeId, const char *city)
     int lastCity = lastCityId(map, routeId);
 
     // sprawdzanie, czy wierzchołek znajduje się na drodze krajowej
-    Element *elem = map->routeList[routeId]->begin->next;
-    while(elem != map->routeList[routeId]->end)
+    foreach(it, map->routeList[routeId])
     {
-        if( *v == ((OrientedEdge*)elem->value)->v )
+        OrientedEdge *edge = it->value;
+        if(*v == edge->v)
             return false;
-        elem = elem->next;
     }
     if(lastCity == *v)
         return false;
@@ -297,50 +298,54 @@ bool extendRoute(Map *map, unsigned routeId, const char *city)
     setRouteVisited(map, routeId);
     Node *node = map->graph->nodes->tab[firstCity];
     node->visited =false;
-    List *path1 = bestPath(map->graph, *v, firstCity);
 
-    if(path1 == map->graph->ambiguous)
-        return false;
+    List *path1 = bestPath(map->graph, *v, firstCity);
 
     int pathLength1 = 0;
     int pathYear1 = maxYear;
     if(path1 != NULL)
     {
-        Element *elem1 = path1->begin->next;
-        while(elem1 != path1->end)
+        foreach(it, path1)
         {
-            pathLength1 += ((OrientedEdge*)elem1->value)->edge->length;
-            pathYear1 = min(pathYear1, ((OrientedEdge*)elem1->value)->edge->builtYear);
-
-            elem1 = elem1->next;
+            OrientedEdge *edge = it->value;
+            pathLength1 += edge->edge->length;
+            pathYear1 = min(pathYear1, edge->edge->builtYear);
         }
     }
 
     setRouteVisited(map, routeId);
-    List *path2 = bestPath(map->graph, lastCity, *v);
 
-    if(path2 == map->graph->ambiguous)
-        return false;
+    List *path2 = bestPath(map->graph, lastCity, *v);
 
     int pathLength2 = 0;
     int pathYear2 = maxYear;
     if(path2 != NULL)
     {
-        Element *elem2 = path2->begin->next;
-        while(elem2 != path2->end)
+        foreach(it, path2)
         {
-            pathLength2 += ((OrientedEdge*)elem2->value)->edge->length;
-            pathYear2 = min(pathYear2, ((OrientedEdge*)elem2->value)->edge->builtYear);
-
-            elem2 = elem2->next;
+            OrientedEdge *edge = it->value;
+            pathLength2 += edge->edge->length;
+            pathYear2 = min(pathYear2, edge->edge->builtYear);
         }
     }
 
-    if(path1 == NULL && path2 == NULL) return false;
-    if(path2 == NULL) listInsertList(map->routeList[routeId]->begin, path1);
-    else if(path1 == NULL) listInsertList(map->routeList[routeId]->end->prev, path2);
+    // Któraś ze ścieżek jest niejednoznaczna
+    if(path1 == map->graph->ambiguous)
+        return false;
+    if(path2 == map->graph->ambiguous)
+        return false;
+
+    if(path1 == NULL && path2 == NULL) // Nie udało się wyznaczyć żadnej ze ścieżek
+        return false;
+
+    if(path2 == NULL) // Wyznaczono jedną ze ścieżek
+        listInsertList(map->routeList[routeId]->begin, path1);
+    else if(path1 == NULL)
+        listInsertList(map->routeList[routeId]->end->prev, path2);
+    // Wyznaczono obie ścieżki, ale są niejednoznaczne
     else if( pathLength1 == pathLength2 && pathYear1 == pathYear2 )
         return false;
+    // Wyznaczono obie ścieżki. Wybieramy lepszą.
     else if(pathLength1 < pathLength2 || (pathLength1 == pathLength2 && pathYear1 > pathLength2))
         listInsertList(map->routeList[routeId]->begin, path1);
     else
@@ -350,20 +355,6 @@ bool extendRoute(Map *map, unsigned routeId, const char *city)
     deleteList(path2, true);
 
     return true;
-}
-
-// TODO do grafu
-bool eqEdges(Edge *edge1, Edge *edge2)
-{
-    if(edge1->builtYear != edge2->builtYear)
-        return false;
-
-    if(edge1->length != edge2->length)
-        return false;
-
-    if( (edge1->v1 == edge2->v1 && edge1->v2 == edge2->v2) || (edge1->v1 == edge2->v2 && edge1->v2 == edge2->v1) )
-        return true;
-    return false;
 }
 
 bool removeRoad(Map *map, const char *city1, const char *city2)
@@ -392,11 +383,10 @@ bool removeRoad(Map *map, const char *city1, const char *city2)
             continue;
 
         // szukamy krawędzi removedEdge w route o id i
-        Element *elem = map->routeList[i]->begin->next;
-        while(elem != map->routeList[i]->end)
+        foreach(it, map->routeList[i])
         {
-            OrientedEdge *road = elem->value;
-            if(eqEdges(road->edge, removedEdge)) // robocza poprawka
+            OrientedEdge *road = it->value;
+            if(eqEdges(road->edge, removedEdge))
             {
                 // znaleźliśmy
                 int otherCityId;
@@ -409,6 +399,7 @@ bool removeRoad(Map *map, const char *city1, const char *city2)
                 setRouteVisited(map, i);
                 Node *node = map->graph->nodes->tab[otherCityId];
                 node->visited = false;
+
                 List *path = bestPath(map->graph, road->v, otherCityId);
 
                 if(path == map->graph->ambiguous)
@@ -416,24 +407,19 @@ bool removeRoad(Map *map, const char *city1, const char *city2)
 
                 if(path != NULL) // dodajemy do Change
                 {
-                    listPushBack(changes, newChange(elem->prev, path), NULL);
-//                    listRemove(elem);
+                    listPushBack(changes, newChange(it->prev, path), NULL);
                 }
                 else // usuwamy całą zmianę
                 {
-                    Element *elem = changes->begin->next;
-                    while(elem != changes->end)
+                    foreach(elem, changes)
                     {
-                        Change *change = elem->value;
+                        Change *change = it->value;
                         deleteList(change->path, true);
 
-                        free(elem->value);
-
-                        elem = elem->next;
+                        free(it->value);
                     }
                     deleteList(changes, 0);
-//                    changes = NULL;
-//                    addEdge(map->graph, *v1, *v2, removedEdge->length, removedEdge->builtYear);
+
                     Node *node1 = map->graph->nodes->tab[removedEdge->v1];
                     listPushBack(node1->edges, removedEdge, NULL);
                     Node *node2 = map->graph->nodes->tab[removedEdge->v2];
@@ -443,7 +429,6 @@ bool removeRoad(Map *map, const char *city1, const char *city2)
 
                 break; // znaleźliśmy potrzbną krawędź. Nie trzeba dalej przeszukiwać listy krawędzi
             }
-            elem = elem->next;
         }
     }
 
@@ -501,6 +486,7 @@ char *intToString(int a) // TODO naprawić dla 0
 }
 
 // Łączy dwa napisy
+// todo do ext_string
 char *concatenate(char *string1, const char *string2, int *size, int *allocated)
 {
     while(*string2 != 0)
@@ -572,6 +558,7 @@ void printRoute(List *route)
         OrientedEdge *edge = it->value;
         printf("%d ", edge->v);
     }
+
     OrientedEdge *last = route->end->prev->value;
     printf("%d\n", (last->edge->v2 == last->v)?last->edge->v1:last->edge->v2 );
 }

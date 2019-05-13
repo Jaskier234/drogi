@@ -16,16 +16,7 @@
 /**
  * Struktura przechowująca mapę dróg krajowych.
  */
-//typedef struct Map Map;
-// todo usunąć to
-typedef struct Map
-{
-    Graph *graph;
-    List **routeList;
-    Hashtable **labels;
-    Vector *names;
-//    int namesSize;
-} Map;
+typedef struct Map Map;
 
 /** @brief Tworzy nową strukturę.
  * Tworzy nową, pustą strukturę niezawierającą żadnych miast, odcinków dróg ani
