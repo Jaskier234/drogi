@@ -14,19 +14,19 @@ const int maxYear = INT_MAX;
 
 Graph *newGraph()
 {
-    const int INIT_SIZE = 16;
     Graph *graph = calloc(1, sizeof(Graph));
 
     if(graph == NULL)
         return NULL;
 
-    graph->nodes = calloc(INIT_SIZE, sizeof(Node*));
-    graph->tableSize = INIT_SIZE;
+    graph->nodes = newVector();
     graph->nodeCount = 0;
     graph->ambiguous = newList(NULL);
 
     if(graph->nodes == NULL || graph->ambiguous == NULL)
     {
+        deleteVector(graph->nodes);
+        deleteList(graph->ambiguous, false);
         deleteGraph(graph);
         return NULL;
     }
@@ -41,10 +41,11 @@ void deleteGraph(Graph *graph)
 
     for(int i=0; i<graph->nodeCount; i++)
     {
-        free(graph->nodes[i]->id);
+        Node *node = graph->nodes->tab[i];
+        free(node->id);
 
-        Element *elem = graph->nodes[i]->edges->begin->next;
-        while(elem != graph->nodes[i]->edges->end)
+        Element *elem = node->edges->begin->next;
+        while(elem != node->edges->end)
         {
             Edge *edge = ((Edge*)elem->value);
             elem = elem->next;
@@ -53,10 +54,10 @@ void deleteGraph(Graph *graph)
 
             free(edge);
         }
-        deleteList(graph->nodes[i]->edges, false);
-        free(graph->nodes[i]);
+        deleteList(node->edges, false);
+        free(node);
     }
-    free(graph->nodes);
+    deleteVector(graph->nodes);
     deleteList(graph->ambiguous, 0);
     free(graph);
 }
@@ -110,22 +111,25 @@ Node *newNode()
 
 int *addNode(Graph *graph)
 {
-    if(graph->nodeCount >= graph->tableSize)
-    {
-        graph->tableSize *= 2;
-        graph->nodes = realloc(graph->nodes, graph->tableSize*sizeof(Node));
-        if(graph->nodes == NULL)
-            return NULL;
-    }
+//    if(graph->nodeCount >= graph->tableSize)
+//    {
+//        graph->tableSize *= 2;
+//        graph->nodes = realloc(graph->nodes, graph->tableSize*sizeof(Node));
+//        if(graph->nodes == NULL)
+//            return NULL;
+//    }
 
-    graph->nodes[graph->nodeCount] = newNode();
-    if(graph->nodes[graph->nodeCount] == NULL)
+    Node *node = newNode();
+    if(node == NULL)
         return NULL;
 
-    *graph->nodes[graph->nodeCount]->id = graph->nodeCount;
+    if(!vectorPushBack(graph->nodes, node)) // todo free node
+        return NULL;
+
+    *node->id = graph->nodeCount; // todo jedna linia
     graph->nodeCount++;
 
-    return graph->nodes[graph->nodeCount-1]->id;
+    return node->id;
 }
 
 bool addEdge(Graph *graph, int v1, int v2, int length, int builtYear)
@@ -146,9 +150,12 @@ bool addEdge(Graph *graph, int v1, int v2, int length, int builtYear)
     newEdge->builtYear = builtYear;
     newEdge->length = length;
 
-    if(!listPushBack(graph->nodes[v1]->edges, newEdge, NULL))
+    Node *node1 = graph->nodes->tab[v1];
+    if(!listPushBack(node1->edges, newEdge, NULL))
         return false;
-    if(!listPushBack(graph->nodes[v2]->edges, newEdge, NULL))
+
+    Node *node2 = graph->nodes->tab[v2];
+    if(!listPushBack(node2->edges, newEdge, NULL))
         return false;
 
     return true;
@@ -177,7 +184,8 @@ Edge *getEdge(Graph *graph, int v1, int v2)
 
     // TODO dodać stopień wierzchołka, żeby szukać w wierzchołku o mniejszym stopniu
 
-    foreach(it, graph->nodes[v1]->edges)
+    Node *node = graph->nodes->tab[v1];
+    foreach(it, node->edges)
     {
         Edge *edge = it->value;
         if(otherNodeId(edge, v1) == v2) // znaleziono
@@ -195,13 +203,15 @@ bool removeEdge(Graph *graph, int v1, int v2)
     Element *edge1 = NULL;
     Element *edge2 = NULL;
 
-    foreach(it, graph->nodes[v1]->edges)
+    Node *node1 = graph->nodes->tab[v1];
+    foreach(it, node1->edges)
     {
         if(otherNodeId(it->value, v1) == v2) // mamy krawędź
             edge1 = it;
     }
 
-    foreach(it, graph->nodes[v2]->edges)
+    Node *node2 = graph->nodes->tab[v2];
+    foreach(it, node2->edges)
     {
         if(otherNodeId(it->value, v2) == v1)
             edge2 = it;
@@ -227,7 +237,8 @@ void printGraph(Graph *graph)
     for(int nodeId=0; nodeId < graph->nodeCount; nodeId++)
     {
         printf("%d: ", nodeId);
-        foreach(it, graph->nodes[nodeId]->edges)
+        Node *node = graph->nodes->tab[nodeId];
+        foreach(it, node->edges)
         {
             Edge *edge = it->value;
             printf("%d ", otherNodeId(edge, nodeId));
@@ -312,17 +323,20 @@ List *bestPath(Graph *graph, int v1, int v2)
         Path *n = priorityQueuePop(q);
         int curr = n->nodeId;
 
-        if(graph->nodes[curr]->visited && curr != v1)
+        Node *currentNode = graph->nodes->tab[curr];
+
+        if(currentNode->visited && curr != v1)
             continue;
 
-        graph->nodes[curr]->visited = true;
+        currentNode->visited = true;
 
-        foreach(it, graph->nodes[curr]->edges)
+        foreach(it, currentNode->edges)
         {
             Edge *edge = it->value;
             int other = otherNodeId(edge, curr);
+            Node *otherNode = graph->nodes->tab[other];
 
-            if (graph->nodes[other]->visited == false)
+            if (otherNode->visited == false)
             {
                 Path path1 = pathInit(bestPath[curr].dist + edge->length, min(bestPath[curr].year, edge->builtYear),
                                       other, newOrientedEdge(edge, curr));
@@ -354,8 +368,10 @@ List *bestPath(Graph *graph, int v1, int v2)
         }
     }
 
-    for(int i=0; i<graph->nodeCount; i++) {
-        graph->nodes[i]->visited = false;
+    for(int i=0; i<graph->nodeCount; i++)
+    {
+        Node *node = graph->nodes->tab[i];
+        node->visited = false;
     }
 
     deletePriorityQueue(q);

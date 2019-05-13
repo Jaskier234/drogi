@@ -8,6 +8,7 @@
 
 #include "hashtable.h"
 #include "list.h"
+#include "vector.h"
 
 const int INF;
 const int minYear;
@@ -39,8 +40,8 @@ typedef struct Egde
  */
 typedef struct Graph
 {
-    Node **nodes; ///< Tablica wskaźników na wierzchołki grafu
-    int tableSize; ///< Rozmiar tablicy nodes(ilość zaalokowanej pamięci).
+    Vector *nodes; ///< Tablica wskaźników na wierzchołki grafu
+//    int tableSize; ///< Rozmiar tablicy nodes(ilość zaalokowanej pamięci).
     int nodeCount; ///< Liczba wierzchołków w grafie.
     List *ambiguous; ///< do bestPath
 } Graph;

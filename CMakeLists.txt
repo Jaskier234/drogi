@@ -33,7 +33,7 @@ set(SOURCE_FILES
     src/memory.c
     src/memory.h
     src/priority_queue.c
-    src/priority_queue.h)
+    src/priority_queue.h src/vector.c src/vector.h)
 
 # Wskazujemy plik wykonywalny.
 add_executable(map ${SOURCE_FILES})

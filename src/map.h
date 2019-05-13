@@ -11,6 +11,7 @@
 
 #include <stdbool.h>
 #include "graph.h"
+#include "vector.h"
 
 /**
  * Struktura przechowująca mapę dróg krajowych.
@@ -22,8 +23,8 @@ typedef struct Map
     Graph *graph;
     List **routeList;
     Hashtable **labels;
-    const char **names;
-    int namesSize;
+    Vector *names;
+//    int namesSize;
 } Map;
 
 /** @brief Tworzy nową strukturę.

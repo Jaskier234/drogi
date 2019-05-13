@@ -6,6 +6,7 @@
 
 #include "graph.h"
 #include "list.h"
+//#include "vector.h"
 
 //typedef struct Map
 //{
@@ -40,8 +41,7 @@ Map *newMap(void)
     map->graph = newGraph();
     map->routeList = calloc(1000, sizeof(List*));
     map->labels = newHashtable(INIT_SIZE, newMemory());
-    map->namesSize = INIT_SIZE;
-    map->names = calloc(INIT_SIZE, sizeof(char*)); // TODO może dodać wektor?
+    map->names = newVector();
 
     if(map->graph == NULL || map->routeList == NULL || map->labels == NULL || map->names == NULL)
     {
@@ -71,11 +71,11 @@ void deleteMap(Map *map)
 
     deleteHashtable(map->labels);
 
-    for(int i=0; i<map->namesSize; i++)
+    for(int i=0; i<map->names->filled; i++)
     {
-        free(map->names[i]);
+        free(map->names->tab[i]);
     }
-    free(map->names);
+    deleteVector(map->names);
 
     free(map);
 }
@@ -122,7 +122,8 @@ int *getCity(Map *map, const char *city)
         return NULL;
     }
 
-    map->names[*v] = cityCp;
+//    map->names[*v] = cityCp;
+    vectorPushBack(map->names, cityCp);
 
     if(hashtableInsert(map->labels, cityCp, v))
         return v;
@@ -159,7 +160,7 @@ bool addRoad(Map *map, const char *city1, const char *city2, unsigned length, in
     if(builtYear == 0)
         return false;
 
-    int *v1 = getCity(map, city1);
+    int *v1 = getCity(map, city1); // TODO co jeśli nie uda się druga alokacja?
     if(v1 == NULL)
         return false;
 
@@ -245,18 +246,24 @@ int lastCityId(Map *map, unsigned routeId)
 // zakłada poprawość route na wejściu
 void setRouteVisited(Map *map, unsigned routeId)
 {
-    Element *elem = map->routeList[routeId]->begin->next;
-    while(elem != map->routeList[routeId]->end)
+    foreach(it, map->routeList[routeId])
     {
-        int nodeId = ((OrientedEdge*)elem->value)->v;
-
-        map->graph->nodes[nodeId]->visited = true;
-
-        elem = elem->next;
+        OrientedEdge *edge = it->value;
+        Node *node = map->graph->nodes->tab[edge->v];
+        node->visited = true;
     }
+//    Element *elem = map->routeList[routeId]->begin->next;
+//    while(elem != map->routeList[routeId]->end)
+//    {
+//        int nodeId = ((OrientedEdge*)elem->value)->v;
+//
+//        map->graph->nodes[nodeId]->visited = true;
+//
+//        elem = elem->next;
+//    }
     int last = lastCityId(map, routeId);
-
-    map->graph->nodes[last]->visited = true;
+    Node *node = map->graph->nodes->tab[last];
+    node->visited = true;
 }
 
 bool extendRoute(Map *map, unsigned routeId, const char *city)
@@ -288,7 +295,8 @@ bool extendRoute(Map *map, unsigned routeId, const char *city)
 
     // wyłącz wierzchołki drogi krajowej
     setRouteVisited(map, routeId);
-    map->graph->nodes[firstCity]->visited =false;
+    Node *node = map->graph->nodes->tab[firstCity];
+    node->visited =false;
     List *path1 = bestPath(map->graph, *v, firstCity);
 
     if(path1 == map->graph->ambiguous)
@@ -399,7 +407,8 @@ bool removeRoad(Map *map, const char *city1, const char *city2)
 
                 // odwiedzamy wierzchołki
                 setRouteVisited(map, i);
-                map->graph->nodes[otherCityId]->visited = false;
+                Node *node = map->graph->nodes->tab[otherCityId];
+                node->visited = false;
                 List *path = bestPath(map->graph, road->v, otherCityId);
 
                 if(path == map->graph->ambiguous)
@@ -425,8 +434,10 @@ bool removeRoad(Map *map, const char *city1, const char *city2)
                     deleteList(changes, 0);
 //                    changes = NULL;
 //                    addEdge(map->graph, *v1, *v2, removedEdge->length, removedEdge->builtYear);
-                    listPushBack(map->graph->nodes[removedEdge->v1]->edges, removedEdge, NULL);
-                    listPushBack(map->graph->nodes[removedEdge->v2]->edges, removedEdge, NULL);
+                    Node *node1 = map->graph->nodes->tab[removedEdge->v1];
+                    listPushBack(node1->edges, removedEdge, NULL);
+                    Node *node2 = map->graph->nodes->tab[removedEdge->v2];
+                    listPushBack(node2->edges, removedEdge, NULL);
                     return false;
                 }
 
@@ -533,7 +544,7 @@ char const* getRouteDescription(Map *map, unsigned routeId)
         int id = ((OrientedEdge*)elem->value)->v;
         Edge *edge = ((OrientedEdge*)elem->value)->edge;
 
-        description = concatenate(description, map->names[id], &size, &allocated);
+        description = concatenate(description, map->names->tab[id], &size, &allocated);
         description = concatenate(description, ";", &size, &allocated);
 
         char *roadLength = intToString(edge->length);
@@ -549,7 +560,7 @@ char const* getRouteDescription(Map *map, unsigned routeId)
         elem = elem->next;
     }
 
-    description = concatenate(description, map->names[lastCityId(map, routeId)], &size, &allocated);
+    description = concatenate(description, map->names->tab[lastCityId(map, routeId)], &size, &allocated);
 
     return description;
 }
