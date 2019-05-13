@@ -3,11 +3,11 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
 
 #include "graph.h"
 #include "list.h"
 #include "hashtable.h"
+#include "string_ext.h"
 
 typedef struct Map
 {
@@ -102,8 +102,6 @@ static Change *newChange(Element *position, List *path)
 
     return change;
 }
-
-// todo moduł ext_string
 
 // Zwraca indeks miasta o podanej nazwie, a jeśli takie miasto nie istnieje to je tworzy.
 // Zwraca NULL, gdy nie udało się zaalokować pamięci.
@@ -452,63 +450,6 @@ bool removeRoad(Map *map, const char *city1, const char *city2)
     return true;
 }
 
-// Konwertuje liczbę na napis
-char *intToString(int a) // TODO naprawić dla 0
-{
-    char *string = calloc(20, sizeof(char));
-    int size=0;
-
-    bool minus = (a<0);
-    if(a<0)
-        a *= -1;
-
-    while(a > 0)
-    {
-        string[size] = a%10 + '0';
-        size++;
-        a /= 10;
-    }
-
-    if(minus)
-    {
-        string[size] = '-';
-        size++;
-    }
-
-    for(int i=0; i<size/2; i++)
-    {
-        char temp = string[i];
-        string[i] = string[size-1-i];
-        string[size-1-i] = temp;
-    }
-
-    return string;
-}
-
-// Łączy dwa napisy
-// todo do ext_string
-char *concatenate(char *string1, const char *string2, int *size, int *allocated)
-{
-    while(*string2 != 0)
-    {
-        string1[*size] = *string2;
-        (*size)++;
-
-        if( *size+1 >= *allocated )
-        {
-            (*allocated) *= 2;
-            string1 = realloc(string1, *allocated);
-            if(string1 == NULL)
-                return NULL;
-        }
-
-        string2++;
-    }
-    string1[*size] = 0;
-
-    return string1;
-}
-
 char const* getRouteDescription(Map *map, unsigned routeId)
 {
     int size = 0;
@@ -523,9 +464,7 @@ char const* getRouteDescription(Map *map, unsigned routeId)
     free(routeNr);
     description = concatenate(description, ";", &size, &allocated);
 
-    Element *elem = map->routeList[routeId]->begin->next;
-
-    while(elem != map->routeList[routeId]->end)
+    foreach(elem, map->routeList[routeId])
     {
         int id = ((OrientedEdge*)elem->value)->v;
         Edge *edge = ((OrientedEdge*)elem->value)->edge;
@@ -542,8 +481,6 @@ char const* getRouteDescription(Map *map, unsigned routeId)
         description = concatenate(description, roadYear, &size, &allocated);
         free(roadYear);
         description = concatenate(description, ";", &size, &allocated);
-
-        elem = elem->next;
     }
 
     description = concatenate(description, map->names->tab[lastCityId(map, routeId)], &size, &allocated);
