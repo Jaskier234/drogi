@@ -2,6 +2,7 @@
 #define DROGI_HASHTABLE_H
 
 #include <stdbool.h>
+
 #include "memory.h"
 
 typedef struct Hashtable Hashtable;

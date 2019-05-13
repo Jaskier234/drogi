@@ -1,12 +1,11 @@
 /**
  * @file
- * Interfejs grafu. //todo
+ * Interfejs grafu.
  */
 
 #ifndef DROGI_GRAPH_H
 #define DROGI_GRAPH_H
 
-//#include "hashtable.h"
 #include "list.h"
 #include "vector.h"
 
@@ -41,7 +40,6 @@ typedef struct Egde
 typedef struct Graph
 {
     Vector *nodes; ///< Tablica wskaźników na wierzchołki grafu
-//    int tableSize; ///< Rozmiar tablicy nodes(ilość zaalokowanej pamięci).
     int nodeCount; ///< Liczba wierzchołków w grafie.
     List *ambiguous; ///< do bestPath
 } Graph;
@@ -70,8 +68,6 @@ Graph *newGraph();
  * funkcja nic nie robi.
  */
 void deleteGraph(Graph *graph);
-
-//void deleteOrientedEdge(OrientedEdge *edge);
 
 /**
  * @brief Dodaje wierzchołek do grafu.

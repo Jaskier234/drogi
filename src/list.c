@@ -103,19 +103,6 @@ bool listRemove(Element *elem)
     return true;
 }
 
-int listSize(List *list)
-{
-    if(list == NULL)
-        return 0;
-
-    int size = 0;
-    foreach(it, list)
-    {
-        size++;
-    }
-    return size;
-}
-
 bool listPushBack(List *list, void *value, Memory *memory)
 {
     return listInsert(list->end->prev, value, memory);
@@ -133,4 +120,17 @@ void listInsertList(Element *elem, List *list)
 
     list->begin->next = list->end;
     list->end->prev = list->begin;
+}
+
+int listSize(List *list)
+{
+    if(list == NULL)
+        return 0;
+
+    int size = 0;
+    foreach(it, list)
+    {
+        size++;
+    }
+    return size;
 }

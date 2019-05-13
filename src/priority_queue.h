@@ -2,15 +2,6 @@
 #define DROGI_PRIORITY_QUEUE_H
 
 #include <stdbool.h>
-//#include "graph.h"
-
-//typedef struct QueueElement
-//{
-//    int dist, year;
-//    OrientedEdge *parent;
-//    int nodeId;
-//    int pathCount;
-//} QueueElement;
 
 typedef struct PriorityQueue
 {
@@ -21,8 +12,6 @@ typedef struct PriorityQueue
 } PriorityQueue;
 
 PriorityQueue *newPriorityQueue(int(*cmp)(void *, void *));
-
-//void* newQueueElement(int dist, int year, OrientedEdge *parent, int pathCount);
 
 void deletePriorityQueue(PriorityQueue *queue);
 

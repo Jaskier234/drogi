@@ -1,14 +1,13 @@
 #include "graph.h"
-#include "priority_queue.h"
 
 #include <stdlib.h>
 #include <limits.h>
 #include <assert.h>
 #include <stdio.h>
 
-// TODO long longi
+#include "priority_queue.h"
 
-const int INF = INT_MAX/2; // TODO naprawić to
+const int INF = INT_MAX/2;
 const int minYear = INT_MIN;
 const int maxYear = INT_MAX;
 
@@ -76,18 +75,12 @@ OrientedEdge *newOrientedEdge(Edge *edge, int v)
     return orientedEdge;
 }
 
-// chyba nie potrzebne
-void deleteOrientedEdge(OrientedEdge *edge)
-{
-    free(edge);
-}
-
 /**
  * @brief Alokuje pamięć i inicjalizuje nowy obiekt Node.
  * @return Zwraca wskaźnik na nowo utworzony obiekt Node lub NULL, gdy
  * nie udało się zaalokować pamięci.
  */
-Node *newNode()
+static Node *newNode()
 {
     Node *node = calloc(1, sizeof(Node));
 
@@ -111,22 +104,14 @@ Node *newNode()
 
 int *addNode(Graph *graph)
 {
-//    if(graph->nodeCount >= graph->tableSize)
-//    {
-//        graph->tableSize *= 2;
-//        graph->nodes = realloc(graph->nodes, graph->tableSize*sizeof(Node));
-//        if(graph->nodes == NULL)
-//            return NULL;
-//    }
-
     Node *node = newNode();
     if(node == NULL)
         return NULL;
 
-    if(!vectorPushBack(graph->nodes, node)) // todo free node
+    if(!vectorPushBack(graph->nodes, node))
         return NULL;
 
-    *node->id = graph->nodeCount; // todo jedna linia
+    *node->id = graph->nodeCount;
     graph->nodeCount++;
 
     return node->id;
@@ -227,7 +212,6 @@ bool removeEdge(Graph *graph, int v1, int v2)
     return true;
 }
 
-// TODO do grafu
 bool eqEdges(Edge *edge1, Edge *edge2)
 {
     if(edge1->builtYear != edge2->builtYear)
@@ -327,8 +311,6 @@ List *bestPath(Graph *graph, int v1, int v2)
     }
 
     bestPath[v1] = pathInit(0, maxYear, v1, NULL);
-
-    // TODO sprawdzanie czy priorityQueuePush się powiodło
 
     priorityQueuePush(q, &bestPath[v1]);
 

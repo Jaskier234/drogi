@@ -7,9 +7,8 @@
 #define DROGI_LIST_H
 
 #include <stdbool.h>
-#include "memory.h"
 
-// TODO memory w dokumentacji
+#include "memory.h"
 
 /**
  * Pętla przechodząca po wszystkich elementach listy

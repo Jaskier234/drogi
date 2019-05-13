@@ -15,33 +15,11 @@ PriorityQueue *newPriorityQueue(int(*cmp)(void *, void *)) // todo dodać funkcj
     return queue;
 }
 
-//QueueElement *newQueueElement(int dist, int year, OrientedEdge *parent, int pathCount)
-//{
-//    QueueElement *elem = calloc(1, sizeof(QueueElement));
-//
-//    elem->dist = dist;
-//    elem->year = year;
-//    elem->parent = parent;
-//    elem->pathCount = pathCount;
-//
-//    return elem;
-//}
-
 void deletePriorityQueue(PriorityQueue *queue)
 {
     free(queue->content);
     free(queue);
 }
-
-// true jeżeli a < b tzn. a powinno być niżej w kopcu od b
-// compare(a,a) == false
-// TODO trzeba przekazać w argumencie(w konstruktorze)
-//bool compare(QueueElement *a, QueueElement *b)
-//{
-//    if(a->dist == b->dist)
-//        return a->year > b->year;
-//    return a->dist < b->dist;
-//}
 
 // dodaje element do kolejki priorytetowej. zwraca false, gdy to się nie uda
 bool priorityQueuePush(PriorityQueue *queue, void *elem)

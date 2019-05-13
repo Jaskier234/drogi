@@ -4,10 +4,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "graph.h"
 #include "list.h"
 #include "hashtable.h"
 #include "string_ext.h"
+#include "memory.h"
 
 typedef struct Map
 {
@@ -19,13 +19,6 @@ typedef struct Map
     ///< Zwraca indeks wierzchołka, który reprezentuje miasto o podanej nazwie.
     Vector *names; ///< Wektor przechowujący nazwy maist.
 } Map;
-
-/**
- * Struktura przechowująca zmiany w strukturze dróg krajowych.
- * W funkcji @ref removeRoad zmiany najpierw dodawane są do struktury
- * @ref Change, a dopiero gdy wszystkie okażą się poprawne, są dodawane do
- * struktury dróg.
- */
 
 Map *newMap(void)
 {
@@ -79,13 +72,11 @@ void deleteMap(Map *map)
 }
 
 /**
- * @brief Inicjalizuje i zwraca instancję struktury @ref Change
- * @param position - element litsy dróg krajowych po którym należy wstawić nowe
- * krawędzie drogi
- * @param path - lista krawędzi, które należy wstawić do drogi
- * @return wzkaźnik na strukturę Change, lub NULL, gdy nie udało się zaalokować pamięci
+ * Struktura przechowująca zmiany w strukturze dróg krajowych.
+ * W funkcji @ref removeRoad zmiany najpierw dodawane są do struktury
+ * @ref Change, a dopiero gdy wszystkie okażą się poprawne, są dodawane do
+ * struktury dróg.
  */
-
 typedef struct Change
 {
     Element *positionOfChange; ///< element litsy dróg krajowych po którym należy
@@ -93,6 +84,13 @@ typedef struct Change
     List *path; ///< lista krawędzi, które należy wstawić do drogi
 } Change;
 
+/**
+ * @brief Inicjalizuje i zwraca instancję struktury @ref Change
+ * @param position - element litsy dróg krajowych po którym należy wstawić nowe
+ * krawędzie drogi
+ * @param path - lista krawędzi, które należy wstawić do drogi
+ * @return wzkaźnik na strukturę Change, lub NULL, gdy nie udało się zaalokować pamięci
+ */
 static Change *newChange(Element *position, List *path)
 {
     Change *change = calloc(1, sizeof(Change));
@@ -140,7 +138,7 @@ static int *getCity(Map *map, const char *city)
 }
 
 // Sprawdza poprawność nazwy miasta
-bool isNameCorrect(const char *cityName)
+static bool isNameCorrect(const char *cityName)
 {
     if(*cityName == 0) // pusty napis
         return false;
@@ -237,7 +235,7 @@ bool newRoute(Map *map, unsigned routeId, const char *city1, const char *city2)
 }
 
 // Zwraca id ostatniego miasta na drodze krajowej
-int lastCityId(Map *map, unsigned routeId)
+static int lastCityId(Map *map, unsigned routeId)
 {
     Element *elem = map->routeList[routeId]->end->prev;
 
@@ -252,7 +250,7 @@ int lastCityId(Map *map, unsigned routeId)
 // Oznacza wierzchołki danej drogi krajowej jako odwiedzone, aby uniknąć powtórzeń
 // miast na drodze krajowej
 // zakłada poprawość route na wejściu
-void setRouteVisited(Map *map, unsigned routeId)
+static void setRouteVisited(Map *map, unsigned routeId)
 {
     foreach(it, map->routeList[routeId])
     {
