@@ -69,7 +69,10 @@ char *concatenate(char *string1, const char *string2, int *size, int *allocated)
     return string1;
 }
 
-// Returns next correct command or NULL when there is no more commands
+// Returns next correct command or NULL when there is no more commands, or
+// allocation failed. If value different than NULL is returned, vector
+// should be deleted. Memeory allocated for vector's content should be freed.
+// Vector's content is one block of memory.
 Vector *nextCommand()
 {
     // Memory for getline
@@ -82,26 +85,29 @@ Vector *nextCommand()
     int isCorrect = 0;
     int result;
 
-//    if(input == NULL || splittedInput == NULL) // TODO sprawdzić czy się udało zaalokować, ale nie exit(1);
-//        exit(1);
+    if(input == NULL || splittedInput == NULL)
+    {
+        free(input);
+        deleteVector(splittedInput);
+        return NULL;
+    }
 
     do
     {
-//        for(int i=0; i<5; i++) // TODO vectorClear
-//            splittedInput[i] = NULL;
+        vectorClear(splittedInput);
         result = getline(&input, &size, stdin);
         if(result != -1)
         {
             isCorrect = correct(input, splittedInput); // TODO przerobić correct tak by używało wektora
             if(isCorrect == 0)
-                fprintf( stderr, "ERROR\n");
+                fprintf(stderr, "ERROR\n");
         }
     } while(result != -1 && isCorrect != 1);
 
     if(result == -1)
     {
         free(input);
-        free(splittedInput);
+        deleteVector(splittedInput);
         return NULL;
     }
     else
