@@ -37,4 +37,10 @@ void deleteVector(Vector *vector);
  */
 bool vectorPushBack(Vector *vector, void *value);
 
+/**
+ * usuwa
+ * @param vector
+ */
+void vectorClear(Vector *vector);
+
 #endif //DROGI_VECTOR_H

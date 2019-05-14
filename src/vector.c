@@ -52,3 +52,8 @@ bool vectorPushBack(Vector *vector, void *value)
 
     return true;
 }
+
+void vectorClear(Vector *vector)
+{
+    vector->filled = 0;
+}
