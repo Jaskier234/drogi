@@ -138,6 +138,7 @@ static int *getCity(Map *map, const char *city)
 }
 
 // Sprawdza poprawność nazwy miasta
+// TODO przenieść do valid
 static bool isNameCorrect(const char *cityName)
 {
     if(*cityName == 0) // pusty napis

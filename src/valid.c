@@ -134,6 +134,27 @@ char *readInt(char **input)
     return number;
 }
 
+char *readString(char **input)
+{
+    if(**input == '\0' || **input == '\n')
+        return NULL;
+
+    if(**input == ';')
+    {
+        **input = '\0';
+        (*input)++;
+    }
+
+    char *begin = *input;
+
+    while(**input != ';' && **input != '\n' && **input != '\0')
+    {
+        (*input)++;
+    }
+
+    return begin;
+}
+
 // Checks if input is correct command. If the command is correct it splits
 // to array of words separated by single spaces ans sets it into args
 // 0 - wrong line
@@ -155,79 +176,97 @@ int correct(char *input, Vector *args)
         return 0;
     }
 
-    args[0] = readCommand(&input);
-    if(args[0] == NULL)
+    char *param;
+
+    while(true)
+    {
+        param = readString(&input);
+        if(param == NULL)
+            break;
+        vectorPushBack(args, param);
+    }
+
+    if(*input != '\n')
+    {
         return 0;
-
-    args[1] = readHistory(&input);
-    if(args[1] == NULL)
-        return 0;
-
-    if(strcmp(args[0],"DECLARE") == 0 ||
-    strcmp(args[0],"REMOVE") == 0 ||
-    strcmp(args[0],"VALID") == 0)
-    {
-        if(*input == '\n')
-        {
-            *input = '\0';
-            return 1;
-        }
-        else
-        {
-            return 0;
-        }
     }
+    *input = '\0';
 
-    if(strcmp(args[0],"ENERGY") == 0)
-    {
-        if(*input == '\n')
-        {
-            *input = '\0';
-            return 1;
-        }
-        else
-        {
-            args[2] = readInt(&input);
-            if(args[2] == NULL)
-            {
-                return 0;
-            }
-            if(*input == '\n')
-            {
-                *input = '\0';
-                if(correctInt(args[2]))
-                {
-                    return 1;
-                }
-                else
-                {
-                    return 0;
-                }
-            }
-            else
-            {
-                return 0;
-            }
-        }
-    }
+    return 1;
 
-    if(strcmp(args[0],"EQUAL") == 0)
-    {
-        args[2] = readHistory(&input);
-        if(args[2] == NULL)
-        {
-            return 0;
-        }
-        if(*input == '\n')
-        {
-            *input = '\0';
-            return 1;
-        }
-        else
-        {
-            return 0;
-        }
-    }
-
-    return 0;
+//    args[0] = readCommand(&input);
+//    if(args[0] == NULL)
+//        return 0;
+//
+//    args[1] = readHistory(&input);
+//    if(args[1] == NULL)
+//        return 0;
+//
+//    if(strcmp(args[0],"DECLARE") == 0 ||
+//    strcmp(args[0],"REMOVE") == 0 ||
+//    strcmp(args[0],"VALID") == 0)
+//    {
+//        if(*input == '\n')
+//        {
+//            *input = '\0';
+//            return 1;
+//        }
+//        else
+//        {
+//            return 0;
+//        }
+//    }
+//
+//    if(strcmp(args[0],"ENERGY") == 0)
+//    {
+//        if(*input == '\n')
+//        {
+//            *input = '\0';
+//            return 1;
+//        }
+//        else
+//        {
+//            args[2] = readInt(&input);
+//            if(args[2] == NULL)
+//            {
+//                return 0;
+//            }
+//            if(*input == '\n')
+//            {
+//                *input = '\0';
+//                if(correctInt(args[2]))
+//                {
+//                    return 1;
+//                }
+//                else
+//                {
+//                    return 0;
+//                }
+//            }
+//            else
+//            {
+//                return 0;
+//            }
+//        }
+//    }
+//
+//    if(strcmp(args[0],"EQUAL") == 0)
+//    {
+//        args[2] = readHistory(&input);
+//        if(args[2] == NULL)
+//        {
+//            return 0;
+//        }
+//        if(*input == '\n')
+//        {
+//            *input = '\0';
+//            return 1;
+//        }
+//        else
+//        {
+//            return 0;
+//        }
+//    }
+//
+//    return 0;
 }

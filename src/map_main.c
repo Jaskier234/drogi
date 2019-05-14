@@ -3,6 +3,7 @@
 #include "hashtable.h"
 #include "graph.h"
 #include "priority_queue.h"
+#include "string_ext.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -18,26 +19,39 @@ void listForeach();
 void hashtableBasic();
 void hashtableTime();
 void graphBasic();
-void queueBasic();
+//void queueBasic();
 void dijkstraBasic();
 void routeBasic();
 void multipleRoutes();
 
 int main() {
 
+    Vector *command;
+    while(true)
+    {
+        command = nextCommand();
+        if(command == NULL)
+            break;
 
+        for(int i=0; i<command->filled; i++)
+        {
+            printf("%s ", (char*)command->tab[i]);
+        }
+        printf("\n");
+//        fprintf(stderr, "ERROR\n");
+    }
 
     // testy
-    listBasic();
-    listForeach();
-    hashtableBasic();
-    hashtableTime();
-    graphBasic();
-    mapBasic();
-    queueBasic();
-    dijkstraBasic();
-    routeBasic();
-    multipleRoutes();
+//    listBasic();
+//    listForeach();
+//    hashtableBasic();
+//    hashtableTime();
+//    graphBasic();
+//    mapBasic();
+//    queueBasic();
+//    dijkstraBasic();
+//    routeBasic();
+//    multipleRoutes();
     return 0;
 }
 
@@ -231,39 +245,39 @@ void graphBasic()
     printf("Graph OK\n");
 }
 
-void queueBasic()
-{
-    PriorityQueue *queue = newPriorityQueue();
-
-    priorityQueuePush(queue, newQueueElement(1, 2, 3, 0));
-    priorityQueuePush(queue, newQueueElement(10, 2, 3, 0));
-    priorityQueuePush(queue, newQueueElement(2, 2, 3, 0));
-    priorityQueuePush(queue, newQueueElement(13, 2, 3, 0));
-
-    assert(priorityQueuePop(queue)->dist == 1);
-    assert(priorityQueuePop(queue)->dist == 2);
-    assert(priorityQueuePop(queue)->dist == 10);
-    assert(priorityQueuePop(queue)->dist == 13);
-
-    assert(isEmpty(queue));
-
-    priorityQueuePush(queue, newQueueElement(2, 2019, 3, 0));
-    priorityQueuePush(queue, newQueueElement(2, 2010, 3, 0));
-    priorityQueuePush(queue, newQueueElement(2, 2013, 3, 0));
-    priorityQueuePush(queue, newQueueElement(2, 2000, 3, 0));
-
-    assert(!isEmpty(queue));
-
-    assert(priorityQueuePop(queue)->year == 2019);
-    assert(priorityQueuePop(queue)->year == 2013);
-    assert(priorityQueuePop(queue)->year == 2010);
-    assert(priorityQueuePop(queue)->year == 2000);
-
-    assert(isEmpty(queue));
-
-    deletePriorityQueue(queue);
-    printf("queue OK\n");
-}
+//void queueBasic()
+//{
+//    PriorityQueue *queue = newPriorityQueue();
+//
+//    priorityQueuePush(queue, newQueueElement(1, 2, 3, 0));
+//    priorityQueuePush(queue, newQueueElement(10, 2, 3, 0));
+//    priorityQueuePush(queue, newQueueElement(2, 2, 3, 0));
+//    priorityQueuePush(queue, newQueueElement(13, 2, 3, 0));
+//
+//    assert(priorityQueuePop(queue)->dist == 1);
+//    assert(priorityQueuePop(queue)->dist == 2);
+//    assert(priorityQueuePop(queue)->dist == 10);
+//    assert(priorityQueuePop(queue)->dist == 13);
+//
+//    assert(isEmpty(queue));
+//
+//    priorityQueuePush(queue, newQueueElement(2, 2019, 3, 0));
+//    priorityQueuePush(queue, newQueueElement(2, 2010, 3, 0));
+//    priorityQueuePush(queue, newQueueElement(2, 2013, 3, 0));
+//    priorityQueuePush(queue, newQueueElement(2, 2000, 3, 0));
+//
+//    assert(!isEmpty(queue));
+//
+//    assert(priorityQueuePop(queue)->year == 2019);
+//    assert(priorityQueuePop(queue)->year == 2013);
+//    assert(priorityQueuePop(queue)->year == 2010);
+//    assert(priorityQueuePop(queue)->year == 2000);
+//
+//    assert(isEmpty(queue));
+//
+//    deletePriorityQueue(queue);
+//    printf("queue OK\n");
+//}
 
 void dijkstraBasic()
 {
