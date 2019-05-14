@@ -12,4 +12,6 @@ int correct(char *input, Vector *args);
 
 bool isNameCorrect(const char *cityName);
 
+bool correctInt(char *number, const char *maxNumber, bool isSigned);
+
 #endif // valid_h

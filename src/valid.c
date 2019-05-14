@@ -4,32 +4,44 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <assert.h>
 
 const char *MAX_UINT64 = "18446744073709551615";
 const char *MAX_ROUTE_ID = "999";
 
-// Checks if string energy is convertable to uint64_t
-bool correctInt(char *energy, char *maxNumber, bool isSigned)
+const char *ADD_ROAD = "addRoad";
+const char *REPAIR_ROAD = "repairRoad";
+const char *GET_ROUTE_DESRIPTION = "getRouteDescription";
+
+// Checks if string energy is convertable to integer
+bool correctInt(char *number, const char *maxNumber, bool isSigned)
 {
-    if(strcmp(energy,"0") == 0)
-        return false;
-
-    int size = strlen(energy);
-    if(size > 20)
-        return false;
-
-    for(int i=0; i<size; i++)
+    if(isSigned)
     {
-        if(energy[i] - '0' < 0 || energy[i] - '0' > 9)
+        if(*number == '-')
+            number++;
+    }
+
+    if(strcmp(number,"") == 0)
+        return false;
+
+    unsigned int size = strlen(number);
+    unsigned int maxNrSize = strlen(maxNumber);
+    if(size > maxNrSize)
+        return false;
+
+    for(unsigned int i = 0; i < size; i++)
+    {
+        if(number[i] - '0' < 0 || number[i] - '0' > 9)
             return false;
     }
 
-    if(size < 20)
+    if(size < maxNrSize)
         return true;
 
-    for(int i=0; i<size; i++)
+    for(unsigned int i = 0; i < size; i++)
     {
-        if(energy[i] > maxNumber[i])
+        if(number[i] > maxNumber[i])
             return false;
     }
 
@@ -163,6 +175,7 @@ char *readString(char **input)
 // 2 - ignore line
 int correct(char *input, Vector *args)
 {
+    assert(args->filled == 0);
     // Ignored lines
     if(*input == '#' || *input == '\n')
     {
@@ -192,6 +205,33 @@ int correct(char *input, Vector *args)
         return 0;
     }
     *input = '\0';
+
+    if(strcmp(args->tab[0], ADD_ROAD) == 0)
+    {
+        if(args->filled != 5)
+            return 0;
+
+        if(!isNameCorrect(args->tab[1]) || !isNameCorrect(args->tab[2]))
+            return 0;
+
+
+    }
+    else if(strcmp(args->tab[0], REPAIR_ROAD) == 0)
+    {
+
+    }
+    else if(strcmp(args->tab[0], GET_ROUTE_DESRIPTION) == 0)
+    {
+
+    }
+    else if(correctInt(args->tab[0], MAX_ROUTE_ID, false))
+    {
+
+    }
+    else
+    {
+        return 0;
+    }
 
     return 1;
 
