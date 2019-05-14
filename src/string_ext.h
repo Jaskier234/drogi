@@ -7,6 +7,8 @@
 #define DROGI_STRING_EXT_H
 
 #include <string.h>
+#include <inttypes.h>
+#include "vector.h"
 
 /**
  * Konwertuje liczbę na napis.
@@ -24,5 +26,11 @@ char *intToString(int a);
  * @return Wskaźnik na skonkatenowany napis.
  */
 char *concatenate(char *string1, const char *string2, int *size, int *allocated);
+
+// Returns next correct command or NULL when there is no more commands
+Vector *nextCommand();
+
+// Converts string to uint64_t
+uint64_t stringToNum(char *string);
 
 #endif //DROGI_STRING_EXT_H
