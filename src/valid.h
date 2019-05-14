@@ -10,4 +10,6 @@
 // 2 - ignore line
 int correct(char *input, Vector *args);
 
+bool isNameCorrect(const char *cityName);
+
 #endif // valid_h

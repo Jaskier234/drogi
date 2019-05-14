@@ -8,6 +8,7 @@
 #include "hashtable.h"
 #include "string_ext.h"
 #include "memory.h"
+#include "valid.h"
 
 typedef struct Map
 {
@@ -135,22 +136,6 @@ static int *getCity(Map *map, const char *city)
     free(cityCp);
     return NULL; // nie udało się dodać do hashtable // trzeba usunąć wierzchołek z grafu
     // todo usuwanie ostatniego wierzchołka
-}
-
-// Sprawdza poprawność nazwy miasta
-// TODO przenieść do valid
-static bool isNameCorrect(const char *cityName)
-{
-    if(*cityName == 0) // pusty napis
-        return false;
-
-    while(*cityName != 0)
-    {
-        if(*cityName == ';' || (*cityName <= 31 && *cityName >= 0))
-            return false;
-        cityName++;
-    }
-    return true;
 }
 
 bool addRoad(Map *map, const char *city1, const char *city2, unsigned length, int builtYear)

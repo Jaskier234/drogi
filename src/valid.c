@@ -5,8 +5,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+const char *MAX_UINT64 = "18446744073709551615";
+const char *MAX_ROUTE_ID = "999";
+
 // Checks if string energy is convertable to uint64_t
-bool correctInt(char *energy)
+bool correctInt(char *energy, char *maxNumber, bool isSigned)
 {
     if(strcmp(energy,"0") == 0)
         return false;
@@ -24,8 +27,6 @@ bool correctInt(char *energy)
     if(size < 20)
         return true;
 
-    char *maxNumber = "18446744073709551615";
-
     for(int i=0; i<size; i++)
     {
         if(energy[i] > maxNumber[i])
@@ -38,101 +39,101 @@ bool correctInt(char *energy)
 
 // Compares len first charachers of two strings
 // if any of them is shorter than len returns false
-bool cmpPref(char*line1, char* line2, int len)
-{
-    for(int i=0; i<len; i++)
-    {
-        if(line1[i] == '\0' || line2[i] == '\0')
-        {
-            return false;
-        }
-
-        if(line1[i] != line2[i])
-        {
-            return false;
-        }
-    }
-    return true;
-}
+//bool cmpPref(char*line1, char* line2, int len)
+//{
+//    for(int i=0; i<len; i++)
+//    {
+//        if(line1[i] == '\0' || line2[i] == '\0')
+//        {
+//            return false;
+//        }
+//
+//        if(line1[i] != line2[i])
+//        {
+//            return false;
+//        }
+//    }
+//    return true;
+//}
 
 // Checks if at the beginning of string *input is correct command and returns
 // pointer to string with that command
-char *readCommand(char **input)
-{
-    char *command = *input;
-    if(cmpPref(*input, "DECLARE", 7))
-    {
-        (*input) += 7;
-        return command;
-    }
-    if(cmpPref(*input, "VALID", 5))
-    {
-        (*input) += 5;
-        return command;
-    }
-    if(cmpPref(*input, "REMOVE", 6))
-    {
-        (*input) += 6;
-        return command;
-    }
-    if(cmpPref(*input, "ENERGY", 6))
-    {
-        (*input) += 6;
-        return command;
-    }
-    if(cmpPref(*input, "EQUAL", 5))
-    {
-        (*input) += 5;
-        return command;
-    }
-    return NULL;
-}
+//char *readCommand(char **input)
+//{
+//    char *command = *input;
+//    if(cmpPref(*input, "DECLARE", 7))
+//    {
+//        (*input) += 7;
+//        return command;
+//    }
+//    if(cmpPref(*input, "VALID", 5))
+//    {
+//        (*input) += 5;
+//        return command;
+//    }
+//    if(cmpPref(*input, "REMOVE", 6))
+//    {
+//        (*input) += 6;
+//        return command;
+//    }
+//    if(cmpPref(*input, "ENERGY", 6))
+//    {
+//        (*input) += 6;
+//        return command;
+//    }
+//    if(cmpPref(*input, "EQUAL", 5))
+//    {
+//        (*input) += 5;
+//        return command;
+//    }
+//    return NULL;
+//}
 
-// works similar to readCommand but with history
-char *readHistory(char **input)
-{
-    if(**input != ' ')
-    {
-        return NULL;
-    }
-    **input = '\0';
-    (*input)++;
-    char *history = *input;
-
-    while(**input != ' ' && **input != '\n' && **input != '\0')
-    {
-        if(**input != '0' && **input != '1' && **input != '2' && **input != '3')
-        {
-            return NULL;
-        }
-        (*input)++;
-    }
-
-    return history;
-
-}
-
-// works similar to readCommand but with number
-char *readInt(char **input)
-{
-    if(**input != ' ')
-    {
-        return NULL;
-    }
-    **input = '\0';
-    (*input)++;
-    char *number = *input;
-
-    while(**input != ' ' && **input != '\n' && **input != '\0')
-    {
-        if(**input < '0' || **input > '9')
-        {
-            return NULL;
-        }
-        (*input)++;
-    }
-    return number;
-}
+//// works similar to readCommand but with history
+//char *readHistory(char **input)
+//{
+//    if(**input != ' ')
+//    {
+//        return NULL;
+//    }
+//    **input = '\0';
+//    (*input)++;
+//    char *history = *input;
+//
+//    while(**input != ' ' && **input != '\n' && **input != '\0')
+//    {
+//        if(**input != '0' && **input != '1' && **input != '2' && **input != '3')
+//        {
+//            return NULL;
+//        }
+//        (*input)++;
+//    }
+//
+//    return history;
+//
+//}
+//
+//// works similar to readCommand but with number
+//char *readInt(char **input)
+//{
+//    if(**input != ' ')
+//    {
+//        return NULL;
+//    }
+//    **input = '\0';
+//    (*input)++;
+//    char *number = *input;
+//
+//    while(**input != ' ' && **input != '\n' && **input != '\0')
+//    {
+//        if(**input < '0' || **input > '9')
+//        {
+//            return NULL;
+//        }
+//        (*input)++;
+//    }
+//    return number;
+//}
 
 char *readString(char **input)
 {
@@ -269,4 +270,18 @@ int correct(char *input, Vector *args)
 //    }
 //
 //    return 0;
+}
+
+bool isNameCorrect(const char *cityName)
+{
+    if(*cityName == 0) // pusty napis
+        return false;
+
+    while(*cityName != 0)
+    {
+        if(*cityName == ';' || (*cityName <= 31 && *cityName >= 0))
+            return false;
+        cityName++;
+    }
+    return true;
 }
