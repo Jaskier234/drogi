@@ -115,14 +115,25 @@ Vector *nextCommand()
 }
 
 // Converts string to uint64_t
-uint64_t stringToNum(char *string)
+int64_t stringToNum(char *string)
 {
-    uint64_t number = 0;
+    bool negative = false;
+    if(*string == '-')
+    {
+        negative = true;
+        string++;
+    }
+
+    int64_t number = 0;
     int size = strlen(string);
     for(int i=0; i<size; i++)
     {
         number *= 10;
         number += string[i] - '0';
     }
+
+    if(negative)
+        number *= -1;
+
     return number;
 }

@@ -13,7 +13,7 @@ const char *ADD_ROAD = "addRoad";
 const char *REPAIR_ROAD = "repairRoad";
 const char *GET_ROUTE_DESRIPTION = "getRouteDescription";
 
-// Checks if string energy is convertable to integer
+// Checks if string is convertable to integer
 bool correctInt(char *number, const char *maxNumber, bool isSigned)
 {
     if(isSigned)
@@ -48,104 +48,6 @@ bool correctInt(char *number, const char *maxNumber, bool isSigned)
 
     return true; // poprawić!!!;
 }
-
-// Compares len first charachers of two strings
-// if any of them is shorter than len returns false
-//bool cmpPref(char*line1, char* line2, int len)
-//{
-//    for(int i=0; i<len; i++)
-//    {
-//        if(line1[i] == '\0' || line2[i] == '\0')
-//        {
-//            return false;
-//        }
-//
-//        if(line1[i] != line2[i])
-//        {
-//            return false;
-//        }
-//    }
-//    return true;
-//}
-
-// Checks if at the beginning of string *input is correct command and returns
-// pointer to string with that command
-//char *readCommand(char **input)
-//{
-//    char *command = *input;
-//    if(cmpPref(*input, "DECLARE", 7))
-//    {
-//        (*input) += 7;
-//        return command;
-//    }
-//    if(cmpPref(*input, "VALID", 5))
-//    {
-//        (*input) += 5;
-//        return command;
-//    }
-//    if(cmpPref(*input, "REMOVE", 6))
-//    {
-//        (*input) += 6;
-//        return command;
-//    }
-//    if(cmpPref(*input, "ENERGY", 6))
-//    {
-//        (*input) += 6;
-//        return command;
-//    }
-//    if(cmpPref(*input, "EQUAL", 5))
-//    {
-//        (*input) += 5;
-//        return command;
-//    }
-//    return NULL;
-//}
-
-//// works similar to readCommand but with history
-//char *readHistory(char **input)
-//{
-//    if(**input != ' ')
-//    {
-//        return NULL;
-//    }
-//    **input = '\0';
-//    (*input)++;
-//    char *history = *input;
-//
-//    while(**input != ' ' && **input != '\n' && **input != '\0')
-//    {
-//        if(**input != '0' && **input != '1' && **input != '2' && **input != '3')
-//        {
-//            return NULL;
-//        }
-//        (*input)++;
-//    }
-//
-//    return history;
-//
-//}
-//
-//// works similar to readCommand but with number
-//char *readInt(char **input)
-//{
-//    if(**input != ' ')
-//    {
-//        return NULL;
-//    }
-//    **input = '\0';
-//    (*input)++;
-//    char *number = *input;
-//
-//    while(**input != ' ' && **input != '\n' && **input != '\0')
-//    {
-//        if(**input < '0' || **input > '9')
-//        {
-//            return NULL;
-//        }
-//        (*input)++;
-//    }
-//    return number;
-//}
 
 char *readString(char **input)
 {
@@ -214,19 +116,65 @@ int correct(char *input, Vector *args)
         if(!isNameCorrect(args->tab[1]) || !isNameCorrect(args->tab[2]))
             return 0;
 
+        if(!correctInt(args->tab[3], MAX_UINT64, false))
+            return 0;
 
+        if(!correctInt(args->tab[4], MAX_UINT64, true))
+            return 0;
+
+        if(strcmp(args->tab[3], "0") == 0 || strcmp(args->tab[4], "0") == 0)
+            return 0;
     }
     else if(strcmp(args->tab[0], REPAIR_ROAD) == 0)
     {
+        if(args->filled != 4)
+            return 0;
 
+        if(!isNameCorrect(args->tab[1]) || !isNameCorrect(args->tab[2]))
+            return 0;
+
+        if(!correctInt(args->tab[3], MAX_UINT64, true))
+            return 0;
+
+        if(strcmp(args->tab[3], "0") == 0)
+            return 0;
     }
     else if(strcmp(args->tab[0], GET_ROUTE_DESRIPTION) == 0)
     {
+        if(args->filled != 2)
+            return 0;
 
+        if(!correctInt(args->tab[1], MAX_ROUTE_ID, false))
+            return 0;
     }
     else if(correctInt(args->tab[0], MAX_ROUTE_ID, false))
     {
+        int it=1;
+        while(it+2 < args->filled)
+        {
+            if(!isNameCorrect(args->tab[it]))
+                return 0;
 
+            if(!correctInt(args->tab[it+1], MAX_UINT64, false))
+                return 0;
+
+            if(!correctInt(args->tab[it+2], MAX_UINT64, true))
+                return 0;
+
+            if(strcmp(args->tab[it+1], "0") == 0 || strcmp(args->tab[it+2], "0") == 0)
+                return 0;
+
+            it += 3;
+        }
+
+        if(args->filled == 2)
+            return 0;
+
+        if(!isNameCorrect(args->tab[it]))
+            return 0;
+
+        if(args->filled != it+1)
+            return 0;
     }
     else
     {
@@ -234,82 +182,6 @@ int correct(char *input, Vector *args)
     }
 
     return 1;
-
-//    args[0] = readCommand(&input);
-//    if(args[0] == NULL)
-//        return 0;
-//
-//    args[1] = readHistory(&input);
-//    if(args[1] == NULL)
-//        return 0;
-//
-//    if(strcmp(args[0],"DECLARE") == 0 ||
-//    strcmp(args[0],"REMOVE") == 0 ||
-//    strcmp(args[0],"VALID") == 0)
-//    {
-//        if(*input == '\n')
-//        {
-//            *input = '\0';
-//            return 1;
-//        }
-//        else
-//        {
-//            return 0;
-//        }
-//    }
-//
-//    if(strcmp(args[0],"ENERGY") == 0)
-//    {
-//        if(*input == '\n')
-//        {
-//            *input = '\0';
-//            return 1;
-//        }
-//        else
-//        {
-//            args[2] = readInt(&input);
-//            if(args[2] == NULL)
-//            {
-//                return 0;
-//            }
-//            if(*input == '\n')
-//            {
-//                *input = '\0';
-//                if(correctInt(args[2]))
-//                {
-//                    return 1;
-//                }
-//                else
-//                {
-//                    return 0;
-//                }
-//            }
-//            else
-//            {
-//                return 0;
-//            }
-//        }
-//    }
-//
-//    if(strcmp(args[0],"EQUAL") == 0)
-//    {
-//        args[2] = readHistory(&input);
-//        if(args[2] == NULL)
-//        {
-//            return 0;
-//        }
-//        if(*input == '\n')
-//        {
-//            *input = '\0';
-//            return 1;
-//        }
-//        else
-//        {
-//            return 0;
-//        }
-//    }
-//
-//    return 0;
 }
 
 bool isNameCorrect(const char *cityName)
