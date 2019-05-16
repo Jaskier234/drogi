@@ -4,6 +4,7 @@
 #include "graph.h"
 #include "priority_queue.h"
 #include "string_ext.h"
+#include "valid.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -24,7 +25,22 @@ void dijkstraBasic();
 void routeBasic();
 void multipleRoutes();
 
-int main() {
+int main()
+{
+//    printf("%" PRId64 "\n", stringToNum("123"));
+//    printf("%" PRId64 "\n", stringToNum("-123"));
+//    printf("%" PRId64 "\n", stringToNum("0"));
+//    printf("%" PRId64 "\n", stringToNum("-0"));
+//    printf("%" PRId64 "\n", stringToNum("9223372036854775807"));
+////    printf("%" PRId64 "\n", stringToNum("9223372036854775808"));
+//    printf("%" PRId64 "\n", stringToNum("-9223372036854775807"));
+//    printf("%" PRId64 "\n", stringToNum("-9223372036854775808"));
+////    printf("%" PRId64 "\n", stringToNum("-9223372036854775809"));
+
+    Map *map = newMap();
+
+    if(map == NULL)
+        exit(0);
 
     Vector *command;
     while(true)
@@ -33,13 +49,37 @@ int main() {
         if(command == NULL)
             break;
 
-        for(int i=0; i<command->filled; i++)
+        // TODO stworzyć stałe
+        if(strcmp(command->tab[0], "addRoad") == 0)
         {
-            printf("%s ", (char*)command->tab[i]);
+            if(!addRoad(map, command->tab[1], command->tab[2], stringToNum(command->tab[3]), stringToNum(command->tab[4])))
+                fprintf(stderr, "ERROR %d\n", lineNr);
         }
-        printf("\n");
-//        fprintf(stderr, "ERROR\n");
+        else if(strcmp(command->tab[0], "repairRoad") == 0)
+        {
+            if(!repairRoad(map, command->tab[1], command->tab[2], stringToNum(command->tab[3])))
+                fprintf(stderr, "ERROR %d\n", lineNr);
+        }
+        else if(strcmp(command->tab[0], "getRouteDescription") == 0)
+        {
+            const char *description = getRouteDescription(map, stringToNum(command->tab[1]));
+            if(description == NULL)
+                fprintf(stderr, "ERROR %d\n", lineNr);
+            else
+                printf("%s\n", description);
+
+            free((char*)description);
+        }
+        else
+        {
+            if(!addRoute(map, command))
+                fprintf(stderr, "ERROR %d\n", lineNr);
+        }
+        free(command->tab[0]);
+        deleteVector(command);
     }
+
+    deleteMap(map);
 
     // testy
 //    listBasic();
@@ -373,4 +413,31 @@ void multipleRoutes()
     printf("multiple routes OK\n");
 
     deleteMap(map);
+}
+
+void basicCorrectInt()
+{
+    assert(correctInt("123", "1000", false));
+    assert(correctInt("0", "1000", false));
+    assert(correctInt("999", "1000", false));
+    assert(!correctInt("1001", "1000", false));
+    assert(!correctInt("-123", "1000", false));
+
+    assert(!correctInt("", "1000", false));
+    assert(correctInt("123", "1000", true));
+    assert(correctInt("-123", "1000", true));
+    assert(!correctInt("-1123", "1000", true));
+    assert(!correctInt("-asd", "1000", true));
+    assert(!correctInt("-112d3", "1000", true));
+    assert(!correctInt("-1123d", "1000", true));
+    assert(!correctInt("1   123", "1000", true));
+    assert(!correctInt("-", "1000", true));
+    assert(!correctInt("-", "1000", false));
+    assert(!correctInt("123;123", "1000", false));
+
+    assert(correctInt("18446744073709551615", "18446744073709551615", true));
+    assert(correctInt("-18446744073709551615", "18446744073709551615", true));
+    assert(!correctInt("-18446744073709551615", "18446744073709551615", false));
+
+    printf("correctInt OK\n");
 }

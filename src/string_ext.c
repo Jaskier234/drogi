@@ -96,11 +96,12 @@ Vector *nextCommand()
     {
         vectorClear(splittedInput);
         result = getline(&input, &size, stdin);
+        lineNr++;
         if(result != -1)
         {
-            isCorrect = correct(input, splittedInput); // TODO przerobić correct tak by używało wektora
+            isCorrect = correct(input, splittedInput);
             if(isCorrect == 0)
-                fprintf(stderr, "ERROR\n");
+                fprintf(stderr, "ERROR %d\n", lineNr);
         }
     } while(result != -1 && isCorrect != 1);
 

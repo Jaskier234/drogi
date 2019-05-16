@@ -233,6 +233,97 @@ static int lastCityId(Map *map, unsigned routeId)
     return edge->v1;
 }
 
+bool addRoute(Map *map, Vector *description)
+{
+    // TODO sprawdzanie samoprzecięć
+    int routeId = stringToNum(description->tab[0]);
+    if(map->routeList[routeId] != NULL) // droga już istnieje
+        return false;
+
+    List *route = newList(NULL);
+
+    int it = 4;
+
+    Node *node = NULL;
+
+    while(it < description->filled)
+    {
+        int *v1 = hashtableGet(map->labels, description->tab[it-3]);
+        int *v2 = hashtableGet(map->labels, description->tab[it]);
+
+        if(v1 == NULL || v2 == NULL || getEdge(map->graph, *v1, *v2) == NULL)
+        {
+            if(!addRoad(map, description->tab[it-3], description->tab[it], stringToNum(description->tab[it-2]), stringToNum(description->tab[it-1])))
+            {
+                deleteList(route, true);
+                return false;
+            }
+            v1 = hashtableGet(map->labels, description->tab[it-3]);
+            v2 = hashtableGet(map->labels, description->tab[it]);
+        }
+
+        node = map->graph->nodes->tab[*v2];
+        if(node->visited)
+        {
+            foreach(city, route)
+            {
+                OrientedEdge *road = city->value;
+                ((Node*)map->graph->nodes->tab[road->v])->visited = false;
+            }
+            node->visited = false;
+            deleteList(route, true);
+            return false;
+        }
+
+        Edge *edge = getEdge(map->graph, *v1, *v2); // Różne od NULL
+
+        if(stringToNum(description->tab[it-2]) != edge->length)
+        {
+            foreach(city, route)
+            {
+                OrientedEdge *road = city->value;
+                ((Node*)map->graph->nodes->tab[road->v])->visited = false;
+            }
+            node->visited = false;
+            deleteList(route, true);
+            return false;
+        }
+
+        int64_t year = stringToNum(description->tab[it-1]);
+        if(year < edge->builtYear)
+        {
+            foreach(city, route)
+            {
+                OrientedEdge *road = city->value;
+                ((Node*)map->graph->nodes->tab[road->v])->visited = false;
+            }
+            node->visited = false;
+            deleteList(route, true);
+            return false;
+        }
+        else
+            edge->builtYear = year;
+
+        listPushBack(route, newOrientedEdge(edge, *v1), NULL);
+
+        Node *node1 = map->graph->nodes->tab[*v1];
+        node1->visited = true;
+        Node *node2 = map->graph->nodes->tab[*v2];
+        node2->visited = true;
+
+        it += 3;
+    }
+
+    foreach(city, route)
+    {
+        OrientedEdge *edge = city->value;
+        ((Node*)map->graph->nodes->tab[edge->v])->visited = false;
+    }
+    node->visited = false;
+    map->routeList[routeId] = route;
+    return true;
+}
+
 // Oznacza wierzchołki danej drogi krajowej jako odwiedzone, aby uniknąć powtórzeń
 // miast na drodze krajowej
 // zakłada poprawość route na wejściu

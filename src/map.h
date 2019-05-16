@@ -84,6 +84,25 @@ bool repairRoad(Map *map, const char *city1, const char *city2, int repairYear);
 bool newRoute(Map *map, unsigned routeId,
               const char *city1, const char *city2);
 
+/**
+ * @brief Tworzy nową drogę krajową na podstawie opisu drogi krajowej.
+ * Tworzy drogę krajową przechodzącą przez miasta podane w @p description.
+ * Jeśli drogi pomiędzy jakąś parą kolejnych miast nie ma w mapie, to dodaje
+ * ją do mapy. Jeśli droga już istnieje, sprawdza czy jest zgodna z tą podaną
+ * w @p description(tzn. ma tą samą długość i wcześniejszy lub równy rok).
+ * Jeśli nie ma żadnych niezgodności do mapy dodawana jest droga krajowa.
+ * // TODO opisać decyzje
+ * @param map Wskaźnik na mapę, do której dodawana jest droga
+ * @param description Wskaźnik na wektor opisujący drogę krajową. W wektorze
+ * przechowywane są wskaźniki na kolejne napisy. Kolejność napisów jest taka
+ * sama jak w wyniku polecenia getRouteDescription. idDrogi, miasto1, długość,
+ * rok, miasto2, ... miastoN.
+ * @return @p true jeśli uda się dodać drogę lub @p false w wypadku, gdy któraś
+ * z dróg podanych w @p description jest niezgodna z tą istniejącą w mapie,
+ * droga o podanym id już istnieje lub nie udało się zaalokować pamięci.
+ */
+bool addRoute(Map *map, Vector *description);
+
 /** @brief Wydłuża drogę krajową do podanego miasta.
  * Dodaje do drogi krajowej nowe odcinki dróg do podanego miasta w taki sposób,
  * aby nowy fragment drogi krajowej był najkrótszy. Jeśli jest więcej niż jeden

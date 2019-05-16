@@ -10,6 +10,8 @@
 #include <inttypes.h>
 #include "vector.h"
 
+int lineNr;
+
 /**
  * Konwertuje liczbę na napis.
  * @param a Liczba do skonwertowania.

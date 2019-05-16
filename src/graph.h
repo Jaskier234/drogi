@@ -70,6 +70,14 @@ Graph *newGraph();
 void deleteGraph(Graph *graph);
 
 /**
+ * Tworzy nowy obiekt OrientedEdge.
+ * @param edge Wsjaźnik na krawędź.
+ * @param v Indeks wyróżnionego wierzchołka.
+ * @return Wskaźnik na OrientedEdge.
+ */
+OrientedEdge *newOrientedEdge(Edge *edge, int v);
+
+/**
  * @brief Dodaje wierzchołek do grafu.
  * @param graph Graf, do którego ma zostać dodany wierzchołek.
  * @return Wskaźnik na id wierzchołka lub NULL, gdy nie udało się
@@ -88,6 +96,8 @@ int *addNode(Graph *graph);
  * podano nieprawidłowe id wierzchołków lub nie udało się zaalokować pamięci.
  */
 bool addEdge(Graph *graph, int v1, int v2, int length, int builtYear);
+
+int otherNodeId(Edge *edge, int v);
 
 /**
  * @brief Szuka w grafie krawędzi pomiędzy @p v1 i @p v2

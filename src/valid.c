@@ -170,11 +170,12 @@ int correct(char *input, Vector *args)
         if(args->filled == 2)
             return 0;
 
-        if(!isNameCorrect(args->tab[it]))
-            return 0;
-
         if(args->filled != it+1)
             return 0;
+
+        if(!isNameCorrect(args->tab[it])) {
+            return 0;
+        }
     }
     else
     {
