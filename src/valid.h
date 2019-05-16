@@ -3,6 +3,10 @@
 
 #include "vector.h"
 
+const char *ADD_ROAD = "addRoad";
+const char *REPAIR_ROAD = "repairRoad";
+const char *GET_ROUTE_DESRIPTION = "getRouteDescription";
+
 // Checks if input is correct command. If the command is correct it splits
 // to array of words separated by single spaces ans sets it into args
 // 0 - wrong line
