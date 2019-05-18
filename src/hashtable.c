@@ -100,7 +100,7 @@ bool changeSize(Hashtable **hash, int newSize)
     return true;
 }
 
-long long hash(char *string)
+long long hash(const char *string)
 {
     const long long MOD = 1e9+7;
 
