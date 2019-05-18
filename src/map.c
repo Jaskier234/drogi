@@ -237,24 +237,82 @@ bool addRoute(Map *map, Vector *description)
     if(map->routeList[routeId] != NULL) // droga już istnieje
         return false;
 
+    List *visited = newList(NULL);
+
     for(int i=4; i<description->filled; i += 3)
     {
-        int *v1 = hashtableGet(map->labels, description->tab[i-3]);
-        int *v2 = hashtableGet(map->labels, description->tab[i]);
+        int *v1 = getCity(map, description->tab[i-3]); // hashtableGet(map->labels, description->tab[i-3]);
+        int *v2 = getCity(map, description->tab[i]); //hashtableGet(map->labels, description->tab[i]);
 
-        if(v1 != NULL && v2 != NULL)
+        if(v1 == NULL || v2 == NULL)
         {
-            Edge *edge = getEdge(map->graph, *v1, *v2);
-            if(edge != NULL)
+            foreach(it, visited)
             {
-                if(stringToNum(description->tab[i-2]) != edge->length)
-                    return false;
+                int *nodeId = it->value;
+                Node *node = map->graph->nodes->tab[*nodeId];
+                node->visited = false;
+            }
+            deleteList(visited, false);
+            return false;
+        }
 
-                if(stringToNum(description->tab[i-1]) < edge->builtYear)
-                    return false;
+        Node *currentNode = map->graph->nodes->tab[*v2];
+        if(currentNode->visited)
+        {
+            foreach(it, visited)
+            {
+                int *nodeId = it->value;
+                Node *node = map->graph->nodes->tab[*nodeId];
+                node->visited = false;
+            }
+            deleteList(visited, false);
+            return false;
+        }
+
+        Edge *edge = getEdge(map->graph, *v1, *v2);
+        if(edge != NULL)
+        {
+            if (stringToNum(description->tab[i - 2]) != edge->length)
+            {
+                foreach(it, visited)
+                {
+                    int *nodeId = it->value;
+                    Node *node = map->graph->nodes->tab[*nodeId];
+                    node->visited = false;
+                }
+                deleteList(visited, false);
+                return false;
+            }
+            if (stringToNum(description->tab[i - 1]) < edge->builtYear)
+            {
+                foreach(it, visited)
+                {
+                    int *nodeId = it->value;
+                    Node *node = map->graph->nodes->tab[*nodeId];
+                    node->visited = false;
+                }
+                deleteList(visited, false);
+                return false;
             }
         }
+
+        Node *node1 = map->graph->nodes->tab[*v1];
+        node1->visited = true;
+        Node *node2 = map->graph->nodes->tab[*v2];
+        node2->visited = true;
+
+        if(i == 4)
+            listPushBack(visited, v1, NULL);
+        listPushBack(visited, v2, NULL);
     }
+
+    foreach(it, visited)
+    {
+        int *nodeId = it->value;
+        Node *node = map->graph->nodes->tab[*nodeId];
+        node->visited = false;
+    }
+    deleteList(visited, false);
 
     List *route = newList(NULL);
     if(route == NULL)
@@ -262,7 +320,7 @@ bool addRoute(Map *map, Vector *description)
 
 //    int it = 4;
 
-    Node *node = NULL;
+//    Node *node = NULL;
 
     for(int i=4; i<description->filled; i += 3)
     {
@@ -278,19 +336,6 @@ bool addRoute(Map *map, Vector *description)
             }
             v1 = hashtableGet(map->labels, description->tab[i-3]);
             v2 = hashtableGet(map->labels, description->tab[i]);
-        }
-
-        node = map->graph->nodes->tab[*v2];
-        if(node->visited)
-        {
-            foreach(city, route)
-            {
-                OrientedEdge *road = city->value;
-                ((Node*)map->graph->nodes->tab[road->v])->visited = false;
-            }
-            node->visited = false;
-            deleteList(route, true);
-            return false;
         }
 
         Edge *edge = getEdge(map->graph, *v1, *v2); // Różne od NULL
@@ -324,18 +369,15 @@ bool addRoute(Map *map, Vector *description)
 
         listPushBack(route, newOrientedEdge(edge, *v1), NULL);
 
-        Node *node1 = map->graph->nodes->tab[*v1];
-        node1->visited = true;
-        Node *node2 = map->graph->nodes->tab[*v2];
-        node2->visited = true;
+
     }
 
-    foreach(city, route)
-    {
-        OrientedEdge *edge = city->value;
-        ((Node*)map->graph->nodes->tab[edge->v])->visited = false;
-    }
-    node->visited = false;
+//    foreach(city, route)
+//    {
+//        OrientedEdge *edge = city->value;
+//        ((Node*)map->graph->nodes->tab[edge->v])->visited = false;
+//    }
+////    node->visited = false;
     map->routeList[routeId] = route;
     return true;
 }

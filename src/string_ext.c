@@ -8,7 +8,7 @@
 
 #include "valid.h"
 
-char *intToString(u_int64_t a)
+char *intToString(int64_t a)
 {
     char *string = calloc(20, sizeof(char));
     int size=0;
@@ -107,6 +107,7 @@ Vector *nextCommand()
 
     if(result == -1)
     {
+        // TODO sprawdzić czy nie ma wycieku
         free(input);
         deleteVector(splittedInput);
         return NULL;
