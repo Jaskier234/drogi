@@ -7,6 +7,8 @@
 #include <assert.h>
 
 const char *MAX_UINT64 = "18446744073709551615";
+const char *MAX_UNSIGNED = "4294967295";
+const char *MAX_SIGNED = "2147483647";
 const char *MAX_ROUTE_ID = "999";
 
 const char *ADD_ROAD = "addRoad";
@@ -14,43 +16,7 @@ const char *REPAIR_ROAD = "repairRoad";
 const char *GET_ROUTE_DESRIPTION = "getRouteDescription";
 const char *ERROR = "ERROR";
 
-// Checks if string is convertable to integer
-bool correctInt(char *number, const char *maxNumber, bool isSigned)
-{
-    if(isSigned)
-    {
-        if(*number == '-')
-            number++;
-    }
-
-    if(strcmp(number,"") == 0)
-        return false;
-
-    unsigned int size = strlen(number);
-    unsigned int maxNrSize = strlen(maxNumber);
-    if(size > maxNrSize)
-        return false;
-
-    for(unsigned int i = 0; i < size; i++)
-    {
-        if(number[i] - '0' < 0 || number[i] - '0' > 9)
-            return false;
-    }
-
-    if(size < maxNrSize)
-        return true;
-
-    for(unsigned int i = 0; i < size; i++)
-    {
-        if(number[i] > maxNumber[i])
-            return false;
-    }
-
-
-    return true; // poprawić!!!;
-}
-
-char *readString(char **input)
+static char *readString(char **input)
 {
     if(**input == '\0' || **input == '\n')
         return NULL;
@@ -71,11 +37,6 @@ char *readString(char **input)
     return begin;
 }
 
-// Checks if input is correct command. If the command is correct it splits
-// to array of words separated by single spaces ans sets it into args
-// 0 - wrong line
-// 1 - correct line
-// 2 - ignore line
 int correct(char *input, Vector *args)
 {
     assert(args->filled == 0);
@@ -117,10 +78,10 @@ int correct(char *input, Vector *args)
         if(!isNameCorrect(args->tab[1]) || !isNameCorrect(args->tab[2]))
             return 0;
 
-        if(!correctInt(args->tab[3], MAX_UINT64, false))
+        if(!correctInt(args->tab[3], MAX_UNSIGNED, false))
             return 0;
 
-        if(!correctInt(args->tab[4], MAX_UINT64, true))
+        if(!correctInt(args->tab[4], MAX_SIGNED, true))
             return 0;
 
         if(strcmp(args->tab[3], "0") == 0 || strcmp(args->tab[4], "0") == 0)
@@ -134,7 +95,7 @@ int correct(char *input, Vector *args)
         if(!isNameCorrect(args->tab[1]) || !isNameCorrect(args->tab[2]))
             return 0;
 
-        if(!correctInt(args->tab[3], MAX_UINT64, true))
+        if(!correctInt(args->tab[3], MAX_SIGNED, true))
             return 0;
 
         if(strcmp(args->tab[3], "0") == 0)
@@ -156,10 +117,10 @@ int correct(char *input, Vector *args)
             if(!isNameCorrect(args->tab[it]))
                 return 0;
 
-            if(!correctInt(args->tab[it+1], MAX_UINT64, false))
+            if(!correctInt(args->tab[it+1], MAX_UNSIGNED, false))
                 return 0;
 
-            if(!correctInt(args->tab[it+2], MAX_UINT64, true))
+            if(!correctInt(args->tab[it+2], MAX_SIGNED, true))
                 return 0;
 
             if(strcmp(args->tab[it+1], "0") == 0 || strcmp(args->tab[it+2], "0") == 0)
@@ -198,4 +159,44 @@ bool isNameCorrect(const char *cityName)
         cityName++;
     }
     return true;
+}
+
+// Checks if string is convertable to integer
+bool correctInt(char *number, const char *maxNumber, bool isSigned)
+{
+    if(isSigned)
+    {
+        if(*number == '-')
+            number++;
+    }
+
+    // ignorujemy zera wiodące
+    while(*number == '0')
+        number++;
+
+    if(strcmp(number,"") == 0)
+        return false;
+
+    unsigned int size = strlen(number);
+    unsigned int maxNrSize = strlen(maxNumber);
+    if(size > maxNrSize)
+        return false;
+
+    for(unsigned int i = 0; i < size; i++)
+    {
+        if(number[i] - '0' < 0 || number[i] - '0' > 9)
+            return false;
+    }
+
+    if(size < maxNrSize)
+        return true;
+
+    for(unsigned int i = 0; i < size; i++)
+    {
+        if(number[i] > maxNumber[i])
+            return false;
+    }
+
+
+    return true; // poprawić!!!;
 }
