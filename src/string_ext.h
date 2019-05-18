@@ -16,7 +16,7 @@ int lineNr;
  * @param a Liczba do skonwertowania.
  * @return Wskaźnik na napis.
  */
-char *intToString(int a);
+char *intToString(unsigned long a);
 
 /**
  * Konkatenuje dwa stringi.

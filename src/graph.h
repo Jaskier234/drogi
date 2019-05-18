@@ -30,7 +30,7 @@ typedef struct Node
 typedef struct Egde
 {
     int v1, v2; ///< Indeksy wierzchołków
-    int length; ///< Długość krawędzi
+    unsigned length; ///< Długość krawędzi
     int builtYear; ///< Rok budowy lub ostatniego remontu
 } Edge;
 

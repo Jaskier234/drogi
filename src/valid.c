@@ -54,6 +54,9 @@ int correct(char *input, Vector *args)
         return 0;
     }
 
+    if(*input == ';')
+        return 0;
+
     char *param;
 
     while(true)

@@ -8,7 +8,7 @@
 
 #include "valid.h"
 
-char *intToString(int a)
+char *intToString(u_int64_t a)
 {
     char *string = calloc(20, sizeof(char));
     int size=0;
@@ -115,7 +115,7 @@ Vector *nextCommand()
         return splittedInput;
 }
 
-// Converts string to uint64_t
+// Converts string to int64_t
 int64_t stringToNum(char *string)
 {
     bool negative = false;
