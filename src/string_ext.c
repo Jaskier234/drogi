@@ -101,7 +101,7 @@ Vector *nextCommand()
         {
             isCorrect = correct(input, splittedInput);
             if(isCorrect == 0)
-                fprintf(stderr, "ERROR %d\n", lineNr);
+                fprintf(stderr, "%s %d\n", ERROR, lineNr);
         }
     } while(result != -1 && isCorrect != 1);
 

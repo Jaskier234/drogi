@@ -6,6 +6,7 @@
 const char *ADD_ROAD;
 const char *REPAIR_ROAD;
 const char *GET_ROUTE_DESRIPTION;
+const char *ERROR;
 
 // Checks if input is correct command. If the command is correct it splits
 // to array of words separated by single spaces ans sets it into args

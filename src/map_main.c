@@ -21,22 +21,21 @@ int main()
         if(command == NULL)
             break;
 
-        // TODO stworzyć stałe(jeszcze error?)
         if(strcmp(command->tab[0], ADD_ROAD) == 0)
         {
             if(!addRoad(map, command->tab[1], command->tab[2], stringToNum(command->tab[3]), stringToNum(command->tab[4])))
-                fprintf(stderr, "ERROR %d\n", lineNr);
+                fprintf(stderr, "%s %d\n", ERROR, lineNr);
         }
         else if(strcmp(command->tab[0], REPAIR_ROAD) == 0)
         {
             if(!repairRoad(map, command->tab[1], command->tab[2], stringToNum(command->tab[3])))
-                fprintf(stderr, "ERROR %d\n", lineNr);
+                fprintf(stderr, "%s %d\n", ERROR, lineNr);
         }
         else if(strcmp(command->tab[0], GET_ROUTE_DESRIPTION) == 0)
         {
             const char *description = getRouteDescription(map, stringToNum(command->tab[1]));
             if(description == NULL)
-                fprintf(stderr, "ERROR %d\n", lineNr);
+                fprintf(stderr, "%s %d\n", ERROR, lineNr);
             else
                 printf("%s\n", description);
 
@@ -45,7 +44,7 @@ int main()
         else
         {
             if(!addRoute(map, command))
-                fprintf(stderr, "ERROR %d\n", lineNr);
+                fprintf(stderr, "%s %d\n", ERROR, lineNr);
         }
         free(command->tab[0]);
         deleteVector(command);

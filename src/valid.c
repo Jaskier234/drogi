@@ -12,6 +12,7 @@ const char *MAX_ROUTE_ID = "999";
 const char *ADD_ROAD = "addRoad";
 const char *REPAIR_ROAD = "repairRoad";
 const char *GET_ROUTE_DESRIPTION = "getRouteDescription";
+const char *ERROR = "ERROR";
 
 // Checks if string is convertable to integer
 bool correctInt(char *number, const char *maxNumber, bool isSigned)
