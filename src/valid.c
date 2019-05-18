@@ -9,6 +9,10 @@
 const char *MAX_UINT64 = "18446744073709551615";
 const char *MAX_ROUTE_ID = "999";
 
+const char *ADD_ROAD = "addRoad";
+const char *REPAIR_ROAD = "repairRoad";
+const char *GET_ROUTE_DESRIPTION = "getRouteDescription";
+
 // Checks if string is convertable to integer
 bool correctInt(char *number, const char *maxNumber, bool isSigned)
 {
