@@ -47,7 +47,7 @@ bool vectorPushBack(Vector *vector, void *value)
         vector->size *= 2;
     }
 
-    vector->tab[vector->filled] = value; // TODO może w jednej linijce?
+    vector->tab[vector->filled] = value;
     vector->filled++;
 
     return true;

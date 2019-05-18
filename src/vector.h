@@ -8,6 +8,9 @@
 
 #include <stdbool.h>
 
+/**
+ * Struktura reprezentująca wektor.
+ */
 typedef struct Vector
 {
     void **tab; ///< Tablica przechowująca dane.
@@ -38,8 +41,8 @@ void deleteVector(Vector *vector);
 bool vectorPushBack(Vector *vector, void *value);
 
 /**
- * usuwa
- * @param vector
+ * Usuwa zawartość wektora.
+ * @param vector Wekror do wyczyszczenia.
  */
 void vectorClear(Vector *vector);
 

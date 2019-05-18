@@ -12,11 +12,14 @@
 
 #include <stddef.h>
 
+/**
+ * Struktura reprezentująca obiekt memory.
+ */
 typedef struct Memory Memory;
 
 /**
  * Tworzy nowy obiekt memory.
- * @return
+ * @return Wskaźnik na memory lub NULL, gdy nie udało się zaalokować pamięci.
  */
 Memory *newMemory();
 

@@ -10,6 +10,9 @@
 #include "memory.h"
 #include "valid.h"
 
+/**
+ * Struktura przechowująca mapę dróg krajowych.
+ */
 typedef struct Map
 {
     Graph *graph; ///< Graf przechowujący inforamcje o połączeniach drogowych
@@ -55,7 +58,7 @@ void deleteMap(Map *map)
 
     deleteGraph(map->graph);
 
-    for(int i=0; i<1000; i++)
+    for(int i = 0; i < 1000; i++)
     {
         deleteList(map->routeList[i], true);
     }
@@ -63,7 +66,7 @@ void deleteMap(Map *map)
 
     deleteHashtable(map->labels);
 
-    for(int i=0; i<map->names->filled; i++)
+    for(int i = 0; i < map->names->filled; i++)
     {
         free(map->names->tab[i]);
     }
@@ -131,8 +134,7 @@ static int *getCity(Map *map, const char *city)
     if(hashtableInsert(map->labels, cityCp, v))
         return v;
     free(cityCp);
-    return NULL; // nie udało się dodać do hashtable // trzeba usunąć wierzchołek z grafu
-    // todo usuwanie ostatniego wierzchołka
+    return NULL;
 }
 
 bool addRoad(Map *map, const char *city1, const char *city2, unsigned length, int builtYear)
@@ -149,19 +151,13 @@ bool addRoad(Map *map, const char *city1, const char *city2, unsigned length, in
     if(builtYear == 0)
         return false;
 
-    int *v1 = getCity(map, city1); // TODO co jeśli nie uda się druga alokacja?
+    int *v1 = getCity(map, city1);
     if(v1 == NULL)
         return false;
 
     int *v2 = getCity(map, city2);
     if(v2 == NULL)
         return false;
-
-//    if(v1 == NULL || v2 == NULL) // nie udało się stworzyć wierzchołków
-//    {
-//
-//        return false;
-//    }
 
     return addEdge(map->graph, *v1, *v2, length, builtYear);
 }
@@ -217,7 +213,13 @@ bool newRoute(Map *map, unsigned routeId, const char *city1, const char *city2)
     return true;
 }
 
-// Zwraca id ostatniego miasta na drodze krajowej
+/**
+ * Zwraca id ostatniego miasta na drodze krajowej.
+ * @param map Wskaźnik na mapę, w której jest droga, której ostatni wierzchołek
+ * ma zostać zwrócony.
+ * @param routeId Id drogi, której ostatni wierzchołek ma zostać zwrócony.
+ * @return Id ostatniego wierzchołka na drodze krajowej.
+ */
 static int lastCityId(Map *map, unsigned routeId)
 {
     Element *elem = map->routeList[routeId]->end->prev;
@@ -232,14 +234,13 @@ static int lastCityId(Map *map, unsigned routeId)
 
 bool addRoute(Map *map, Vector *description)
 {
-    // TODO sprawdzanie samoprzecięć
     int routeId = stringToNum(description->tab[0]);
     if(map->routeList[routeId] != NULL) // droga już istnieje
         return false;
 
     List *visited = newList(NULL);
 
-    for(int i=4; i<description->filled; i += 3)
+    for(int i = 4; i < description->filled; i += 3)
     {
         int *v1 = getCity(map, description->tab[i-3]); // hashtableGet(map->labels, description->tab[i-3]);
         int *v2 = getCity(map, description->tab[i]); //hashtableGet(map->labels, description->tab[i]);
@@ -318,11 +319,7 @@ bool addRoute(Map *map, Vector *description)
     if(route == NULL)
         return false;
 
-//    int it = 4;
-
-//    Node *node = NULL;
-
-    for(int i=4; i<description->filled; i += 3)
+    for(int i = 4; i < description->filled; i += 3)
     {
         int *v1 = hashtableGet(map->labels, description->tab[i-3]);
         int *v2 = hashtableGet(map->labels, description->tab[i]);
@@ -339,52 +336,24 @@ bool addRoute(Map *map, Vector *description)
         }
 
         Edge *edge = getEdge(map->graph, *v1, *v2); // Różne od NULL
-//
-//        if(stringToNum(description->tab[it-2]) != edge->length)
-//        {
-//            foreach(city, route)
-//            {
-//                OrientedEdge *road = city->value;
-//                ((Node*)map->graph->nodes->tab[road->v])->visited = false;
-//            }
-//            node->visited = false;
-//            deleteList(route, true);
-//            return false;
-//        }
-
         int64_t year = stringToNum(description->tab[i-1]);
-//        if(year < edge->builtYear)
-//        {
-//            foreach(city, route)
-//            {
-//                OrientedEdge *road = city->value;
-//                ((Node*)map->graph->nodes->tab[road->v])->visited = false;
-//            }
-//            node->visited = false;
-//            deleteList(route, true);
-//            return false;
-//        }
-//        else
         edge->builtYear = year;
 
         listPushBack(route, newOrientedEdge(edge, *v1), NULL);
 
 
     }
-
-//    foreach(city, route)
-//    {
-//        OrientedEdge *edge = city->value;
-//        ((Node*)map->graph->nodes->tab[edge->v])->visited = false;
-//    }
-////    node->visited = false;
     map->routeList[routeId] = route;
     return true;
 }
 
-// Oznacza wierzchołki danej drogi krajowej jako odwiedzone, aby uniknąć powtórzeń
-// miast na drodze krajowej
-// zakłada poprawość route na wejściu
+
+/**
+ * Oznacza wierzchołki danej drogi krajowej jako odwiedzone, aby uniknąć powtórzeń
+ * miast na drodze krajowej zakłada poprawość route na wejściu.
+ * @param map Wskaźnik na mapę, w której jest droga.
+ * @param routeId Id drogi krajowej.
+ */
 static void setRouteVisited(Map *map, unsigned routeId)
 {
     foreach(it, map->routeList[routeId])
@@ -508,7 +477,7 @@ bool removeRoad(Map *map, const char *city1, const char *city2)
 
     List *changes = newList(NULL);
 
-    for(int i=0; i<1000; i++)
+    for(int i = 1; i < 1000; i++)
     {
         if(map->routeList[i] == NULL)
             continue;

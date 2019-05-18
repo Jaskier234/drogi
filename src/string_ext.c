@@ -19,13 +19,13 @@ char *intToString(int64_t a)
         return string;
     }
 
-    bool minus = (a<0);
-    if(a<0)
+    bool minus = (a < 0);
+    if(a < 0)
         a *= -1;
 
     while(a > 0)
     {
-        string[size] = a%10 + '0';
+        string[size] = a % 10 + '0';
         size++;
         a /= 10;
     }
@@ -36,17 +36,16 @@ char *intToString(int64_t a)
         size++;
     }
 
-    for(int i=0; i<size/2; i++)
+    for(int i = 0; i < size/2; i++)
     {
         char temp = string[i];
-        string[i] = string[size-1-i];
-        string[size-1-i] = temp;
+        string[i] = string[size - 1 - i];
+        string[size - 1 - i] = temp;
     }
 
     return string;
 }
 
-// Łączy dwa napisy
 char *concatenate(char *string1, const char *string2, int *size, int *allocated)
 {
     while(*string2 != 0)
@@ -69,10 +68,6 @@ char *concatenate(char *string1, const char *string2, int *size, int *allocated)
     return string1;
 }
 
-// Returns next correct command or NULL when there is no more commands, or
-// allocation failed. If value different than NULL is returned, vector
-// should be deleted. Memeory allocated for vector's content should be freed.
-// Vector's content is one block of memory.
 Vector *nextCommand()
 {
     // Memory for getline
@@ -107,16 +102,16 @@ Vector *nextCommand()
 
     if(result == -1)
     {
-        // TODO sprawdzić czy nie ma wycieku
         free(input);
         deleteVector(splittedInput);
         return NULL;
     }
     else
+    {
         return splittedInput;
+    }
 }
 
-// Converts string to int64_t
 int64_t stringToNum(char *string)
 {
     bool negative = false;
@@ -128,7 +123,7 @@ int64_t stringToNum(char *string)
 
     int64_t number = 0;
     int size = strlen(string);
-    for(int i=0; i<size; i++)
+    for(int i = 0; i < size; i++)
     {
         number *= 10;
         number += string[i] - '0';

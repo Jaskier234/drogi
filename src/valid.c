@@ -16,6 +16,14 @@ const char *REPAIR_ROAD = "repairRoad";
 const char *GET_ROUTE_DESRIPTION = "getRouteDescription";
 const char *ERROR = "ERROR";
 
+/**
+ * Funkcja parsująca wczytaną linię.
+ * Przechodzi po linii do następnego średnika. Jeśli średnik jest pierwszym
+ * znakiem jest zmieniany na '\0'. Umożliwia to rozdzielenie parametrów do
+ * oddzielnych napisów.
+ * @param input Wczytana linia.
+ * @return Wskaźnik na następny parametr ze wczytanej linii.
+ */
 static char *readString(char **input)
 {
     if(**input == '\0' || **input == '\n')
@@ -167,7 +175,6 @@ bool isNameCorrect(const char *cityName)
     return true;
 }
 
-// Checks if string is convertable to integer
 bool correctInt(char *number, const char *maxNumber, bool isSigned)
 {
     if(isSigned)
@@ -209,5 +216,5 @@ bool correctInt(char *number, const char *maxNumber, bool isSigned)
     }
 
 
-    return true; // poprawić!!!;
+    return true;
 }

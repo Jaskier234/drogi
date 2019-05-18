@@ -1,6 +1,8 @@
 /**
  * @file
- * Interfejs grafu.
+ * Interfejs grafu. Graf obsługuje operacje dodawania wierzchołków oraz
+ * dodawania i usuwania krawędzi.
+ * Nie można dodawać wielokrotnych krawędzi.
  */
 
 #ifndef DROGI_GRAPH_H
@@ -9,9 +11,9 @@
 #include "list.h"
 #include "vector.h"
 
-const int INF;
-const int minYear;
-const int maxYear;
+const int INF; ///< Infinity
+const int minYear; ///< Minimalny możliwy rok budowy drogi
+const int maxYear; ///< Maksymalny możliwy rok budowy drogi
 
 /**
  * Struktura reprezentująca wierzchołek grafu
@@ -29,7 +31,8 @@ typedef struct Node
  */
 typedef struct Egde
 {
-    int v1, v2; ///< Indeksy wierzchołków
+    int v1; ///< Indeks wierzchołka
+    int v2; ///< Indeks wierzchołka
     unsigned length; ///< Długość krawędzi
     int builtYear; ///< Rok budowy lub ostatniego remontu
 } Edge;
@@ -97,6 +100,12 @@ int *addNode(Graph *graph);
  */
 bool addEdge(Graph *graph, int v1, int v2, int length, int builtYear);
 
+/**
+ * @brief Zwraca wierzchołek do którego prowadzi krawędź @p edge z wierzchołka @p v.
+ * @param edge Rozpatrywana krawędź.
+ * @param v id wierzchołka początkowego
+ * @return Id wierzchołka do którego prowadzi krawędź.
+ */
 int otherNodeId(Edge *edge, int v);
 
 /**
@@ -128,8 +137,26 @@ bool removeEdge(Graph *graph, int v1, int v2);
  */
 bool eqEdges(Edge *edge1, Edge *edge2);
 
+/**
+ * Wyszukuje najkrótszą ścieżkę pomiędzy wierzchołkmi o id v1 i v2. Jeśli jest
+ * więcej niż jeden sposób takiego wyboru, to dla każdego wariantu wyznacza
+ * wśród wybranych w nim odcinków dróg ten, który był najdawniej wybudowany lub
+ * remontowany i wybiera wariant z odcinkiem, który jest najmłodszy.
+ * @param graph Wskaźnik na graf, w którym są wierzchołki
+ * @param v1 Indeks wierzchołka w grafie
+ * @param v2 Indeks wierzchołka w grafie
+ * @return Wskażnik na listę elementów OrientedEdge, reprezentującą ścieżkę,
+ * NULL w przypadku, gdy nie udało się zaalokować pamięci, lub wskaźnik na
+ * @p graph->ambiguous, gdy nie udało się jednoznacznie wyznaczyć ścieżki.
+ */
 List *bestPath(Graph *graph, int v1, int v2);
 
+/**
+ * Funkcja minimum.
+ * @param a Liczba całkowita.
+ * @param b Liczba całkowita.
+ * @return Zwraca mniejszą z dwóch liczb
+ */
 int min(int a, int b);
 
 /**

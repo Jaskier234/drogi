@@ -9,7 +9,7 @@
 #include <inttypes.h>
 #include "vector.h"
 
-int lineNr;
+int lineNr; ///< Liczba wczytanych linii.
 
 /**
  * Konwertuje liczbę na napis.
@@ -28,10 +28,22 @@ char *intToString(int64_t a);
  */
 char *concatenate(char *string1, const char *string2, int *size, int *allocated);
 
-// Returns next correct command or NULL when there is no more commands
+/**
+ * Parsuje wejście do następnej poprawnej komendy.
+ * Zwrócony wektor powinien zostać usunięty. Pamięć użyta do wczytania
+ * linii również powinna być zwolniona. Wskaźnik na nią zawsze jest równy
+ * vector->tab[0]
+ * @return Zwraca wskaźnik na wektor z parametrami lub NULL, gdy nie ma
+ * więcej komend na wejściu lub nie udało się zaalokować pamięci.
+ */
 Vector *nextCommand();
 
-// Converts string to int64_t
+/**
+ * Konwertuje napis na liczbę.
+ * Nie sprawdza, czy podany napis jest poprawną liczbą.
+ * @param string Napis, który zostanie skonwertowany.
+ * @return Skonwertowana liczba.
+ */
 int64_t stringToNum(char *string);
 
 #endif //DROGI_STRING_EXT_H

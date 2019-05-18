@@ -6,23 +6,31 @@
 #include "list.h"
 #include "memory.h"
 
+/**
+ * Struktura tablicy haszującej
+ */
 typedef struct Hashtable
 {
-    int MOD;
-    List **table;
-    int filled;
-    Memory *memory;
+    int MOD; ///< Aktualna wielkość tablicy. Także wartość modulo
+    ///< użyta podczas decydowania, w której liście umieścić element.
+    List **table; ///< Tablica list przechowująca elementy tablicy haszującej
+    int filled; ///< ilość elementów w tablicy.
+    Memory *memory; ///< Wskaźnik na memory używane w tablicy.
 
 } Hashtable;
 
+/**
+ * Struktura będąca elementem tablicy.
+ */
 typedef struct HashElem
 {
-    void *key, *value;
-    int hash;
+    void *key; ///< Wskaźnik na napis będący kluczem.
+    void *value; ///< Wskaźnik na przechowywaną wartość.
+    int hash; ///< wartość funkcji haszującej dla elementu.
 } HashElem;
 
 
-HashElem *newPair(void *key, void *value, int hash, Memory *memory)
+static HashElem *newPair(void *key, void *value, int hash, Memory *memory)
 {
     HashElem *pair = getMemory(memory, sizeof(HashElem));
     pair->key = key;
@@ -35,20 +43,51 @@ HashElem *newPair(void *key, void *value, int hash, Memory *memory)
 Hashtable **newHashtable(int size, Memory *memory)
 {
     Hashtable **hashtable = calloc(1, sizeof(Hashtable*));
+    if(hashtable == NULL)
+    {
+        deleteHashtable(hashtable);
+        return NULL;
+    }
+
     *hashtable = calloc(1, sizeof(Hashtable));
-    (*hashtable)->MOD = size;//100003;//1024*1024;
+    if(*hashtable == NULL)
+    {
+        deleteHashtable(hashtable);
+        return NULL;
+    }
+
+    (*hashtable)->MOD = size;
     (*hashtable)->table = calloc((*hashtable)->MOD, sizeof(List*));
+
+    if((*hashtable)->table == NULL)
+    {
+        deleteHashtable(hashtable);
+        return NULL;
+    }
+
     if(memory == NULL)
         (*hashtable)->memory = newMemory();
     else
         (*hashtable)->memory = memory;
 
+    if((*hashtable)->memory == NULL)
+    {
+        deleteHashtable(hashtable);
+        return NULL;
+    }
+
     return hashtable;
 }
 
-void deleteHashtableContent(Hashtable **hash)
+/**
+ * Zwalnia zawartość tablicy haszującej.
+ * @param hash Wskaźnik na tablicę do zwonienia.
+ */
+static void deleteHashtableContent(Hashtable **hash)
 {
-    // TODO obsługa przypadku, gdy hash jest NULLem
+    if(hash == NULL || *hash == NULL)
+        return;
+
     deleteMemory((*hash)->memory);
     free((*hash)->table);
     free(*hash);
@@ -60,14 +99,20 @@ void deleteHashtable(Hashtable **hash)
     free(hash);
 }
 
-// Zmienia rozmiar tablicy haszującej
-bool changeSize(Hashtable **hash, int newSize)
+/**
+ * Zmienia rozmiar tablicy haszującej.
+ * @param hash Wskaźnik na tablicę.
+ * @param newSize Nowy rozmiar tablicy.
+ * @return @p true jeśli udało sie zmienić rozmiar lub false gdy nie udało
+ * się zaalokować pamięci.
+ */
+static bool changeSize(Hashtable **hash, int newSize)
 {
     Hashtable **newHash = newHashtable(newSize, NULL);
     if(newHash == NULL)
         return false;
 
-    for(int i=0; i<(*hash)->MOD; i++)
+    for(int i = 0; i < (*hash)->MOD; i++)
     {
         if((*hash)->table[i] != NULL)
         {
@@ -100,6 +145,12 @@ bool changeSize(Hashtable **hash, int newSize)
     return true;
 }
 
+/**
+ * Funkcja haszująca. Liczy wartość modulo @p e9+7, która potem jest modulowana
+ * ponownie modulo @p hash->mod
+ * @param string Wskaźnik na napis, którego hasz ma zostać policzony.
+ * @return Wartość funkcji haszującej.
+ */
 long long hash(const char *string)
 {
     const long long MOD = 1e9+7;
@@ -120,9 +171,6 @@ long long hash(const char *string)
     return hashValue;
 }
 
-// Wstawia do tablicy obiekt value pod klucz key.
-// Jeśli w tablicy była już wartość pod kluczem key, to ją zamienia
-// Zwraca false gdy nie udało się zaalokować pamięci
 bool hashtableInsert(Hashtable **self, char *key, void *value)
 {
     int hashValue = hash(key);
@@ -149,7 +197,6 @@ bool hashtableInsert(Hashtable **self, char *key, void *value)
     return true;
 }
 
-// Zwraca obiekt dodany wcześniej do tablicy, lub NULL gdy nie ma takiego
 void *hashtableGet(Hashtable **self, const char *key)
 {
     int hashValue = hash(key);
@@ -169,7 +216,7 @@ void *hashtableGet(Hashtable **self, const char *key)
         return NULL;
 }
 
-int max(int a, int b)
+static int max(int a, int b)
 {
     if(a > b) return a;
     return b;

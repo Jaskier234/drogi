@@ -2,6 +2,9 @@
 
 #include <stdlib.h>
 
+/**
+ * Struktura reprezentująca obiekt memory.
+ */
 typedef struct Memory
 {
     void ***content; ///< tablica przechowująca zaalokowaną pamięć. Jest to
@@ -17,10 +20,24 @@ Memory *newMemory()
     const size_t initialSize = 64;
 
     Memory *memory = calloc(1, sizeof(Memory));
+    if(memory == NULL)
+        return NULL;
 
     memory->content = calloc(30, sizeof(void**));
+    if(memory->content == NULL)
+    {
+        deleteMemory(memory);
+        return NULL;
+    }
+
     memory->currentIndex = 0;
     memory->content[memory->currentIndex] = calloc(initialSize, sizeof(void*));
+
+    if(memory->content[memory->currentIndex] == NULL)
+    {
+        deleteMemory(memory);
+        return NULL;
+    }
 
     memory->size = initialSize;
     memory->filled = 0;
@@ -47,6 +64,15 @@ void *getMemory(Memory *memory, size_t size)
 
 void deleteMemory(Memory *memory)
 {
+    if(memory == NULL)
+        return;
+
+    if(memory->content == NULL)
+    {
+        free(memory);
+        return;
+    }
+
     for(int i = 0; i < 30; i++)
         free(memory->content[i]);
 

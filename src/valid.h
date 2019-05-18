@@ -7,10 +7,10 @@
 
 #include "vector.h"
 
-const char *ADD_ROAD;
-const char *REPAIR_ROAD;
-const char *GET_ROUTE_DESRIPTION;
-const char *ERROR;
+const char *ADD_ROAD; ///< stała używana do parsowania wejścia.
+const char *REPAIR_ROAD; ///< stała używana do parsowania wejścia.
+const char *GET_ROUTE_DESRIPTION; ///< stała używana do parsowania wejścia.
+const char *ERROR; ///< stała używana do parsowania wejścia.
 
 /**
  * Sprawdza, czy podana na wejściu linia jest poprawnym poleceniem oraz

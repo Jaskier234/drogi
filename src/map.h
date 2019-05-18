@@ -91,7 +91,8 @@ bool newRoute(Map *map, unsigned routeId,
  * ją do mapy. Jeśli droga już istnieje, sprawdza czy jest zgodna z tą podaną
  * w @p description(tzn. ma tą samą długość i wcześniejszy lub równy rok).
  * Jeśli nie ma żadnych niezgodności do mapy dodawana jest droga krajowa.
- * // TODO opisać decyzje
+ * Jeśli podany opis drogi jest niepoprawny lub nie jest zgodny z już
+ * istniejącymi krawędziami, to mapa nie jest modyfikowana.
  * @param map Wskaźnik na mapę, do której dodawana jest droga
  * @param description Wskaźnik na wektor opisujący drogę krajową. W wektorze
  * przechowywane są wskaźniki na kolejne napisy. Kolejność napisów jest taka
@@ -158,6 +159,10 @@ bool removeRoad(Map *map, const char *city1, const char *city2);
  */
 char const* getRouteDescription(Map *map, unsigned routeId);
 
+/**
+ * Wypisuje id wierzchołków drogi krajowej na standardowe wyjście.
+ * @param route Wskaźnik na drogę do wypisania.
+ */
 void printRoute(List *route);
 
 #endif /* __MAP_H__ */

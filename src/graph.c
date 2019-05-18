@@ -7,7 +7,7 @@
 
 #include "priority_queue.h"
 
-const int INF = INT_MAX/2;
+const int INF = INT_MAX / 2;
 const int minYear = INT_MIN;
 const int maxYear = INT_MAX;
 
@@ -57,7 +57,7 @@ void deleteGraph(Graph *graph)
         free(node);
     }
     deleteVector(graph->nodes);
-    deleteList(graph->ambiguous, 0);
+    deleteList(graph->ambiguous, false);
     free(graph);
 }
 
@@ -146,12 +146,6 @@ bool addEdge(Graph *graph, int v1, int v2, int length, int builtYear)
     return true;
 }
 
-/**
- * @brief Zwraca wierzchołek do którego prowadzi krawędź @p edge z wierzchołka @p v.
- * @param edge Rozpatrywana krawędź.
- * @param v id wierzchołka początkowego
- * @return Id wierzchołka do którego prowadzi krawędź.
- */
 int otherNodeId(Edge *edge, int v)
 {
     if(edge->v1 == v)
@@ -166,8 +160,6 @@ Edge *getEdge(Graph *graph, int v1, int v2)
 
     if(v1 >= graph->nodeCount || v2 >= graph->nodeCount) // któregoś z wierzchołków nie ma w grafie
         return NULL;
-
-    // TODO dodać stopień wierzchołka, żeby szukać w wierzchołku o mniejszym stopniu
 
     Node *node = graph->nodes->tab[v1];
     foreach(it, node->edges)
@@ -227,12 +219,12 @@ bool eqEdges(Edge *edge1, Edge *edge2)
 
 int min(int a, int b)
 {
-    return (a<b?a:b);
+    return (a < b ? a : b);
 }
 
 void printGraph(Graph *graph)
 {
-    for(int nodeId=0; nodeId < graph->nodeCount; nodeId++)
+    for(int nodeId = 0; nodeId < graph->nodeCount; nodeId++)
     {
         printf("%d: ", nodeId);
         Node *node = graph->nodes->tab[nodeId];
@@ -245,18 +237,27 @@ void printGraph(Graph *graph)
     }
 }
 
-// Zwraca listę wierzchołków będącą najkrótszą drogą pomiędzy v1 i v2. Jeśli istnieje wiele takich, to zwraca "najnowszą"
-// Jeśli taka droga nie istnieje lub nie da się jej jednodznacznie ustalić, to zwraca NULL
-
+/**
+ * Struktura używana do przechowywania najlepszych ścieżek do danego wierzchołka.
+ */
 typedef struct Path
 {
-    int dist;
-    int year;
-    int nodeId;
-    OrientedEdge *parent;
+    int dist; ///< odległość wierzchołka od źródła.
+    int year; ///< rok ostatniego remontu najstarszej drogi na ścieżce do źródła.
+    int nodeId; ///< Id wierzchołka.
+    OrientedEdge *parent; ///< Krawędź sierowana, przez którą prowadzi najkrótsza.
+    ///< ścieżka do źródła.
 } Path;
 
-Path pathInit(int dist, int year, int node, OrientedEdge *parent)
+/**
+ * Inicjalizuje obiekt path.
+ * @param dist odległość wierzchołka od źródła.
+ * @param year rok ostatniego remontu najstarszej drogi na ścieżce do źródła.
+ * @param node Id wierzchołka.
+ * @param parent Krawędź sierowana, przez którą prowadzi najkrótsza.
+ * @return Obiekt Path.
+ */
+static Path pathInit(int dist, int year, int node, OrientedEdge *parent)
 {
     Path p;
     p.dist = dist;
@@ -267,9 +268,13 @@ Path pathInit(int dist, int year, int node, OrientedEdge *parent)
     return p;
 }
 
-// 1 - jeśli path1 jest lepsza od path2
-// 0 - takie same
-int compare(void *a, void *b)
+/**
+ * Porównuje dwa obiekty Path.
+ * @param a Obiekt Paht.
+ * @param b Obiekt Paht.
+ * @return 0 gdy są równe, 1 - gdy pierwszy argument jest mniejszy lub -1 w przeciwnym wypadku.
+ */
+static int compare(void *a, void *b)
 {
     Path *path1 = a;
     Path *path2 = b;
@@ -285,8 +290,6 @@ int compare(void *a, void *b)
     return ((path1->dist < path2->dist)?(1):(-1)); // 1 - path1 lepsza
 }
 
-
-// NULL gdy problemy z pamiecią
 List *bestPath(Graph *graph, int v1, int v2)
 {
     PriorityQueue *q = newPriorityQueue(compare);
@@ -304,7 +307,7 @@ List *bestPath(Graph *graph, int v1, int v2)
         return NULL;
     }
 
-    for(int i=0; i<graph->nodeCount; i++)
+    for(int i = 0; i < graph->nodeCount; i++)
     {
           bestPath[i] = pathInit(INF, minYear, i, NULL);
           secondPath[i] = pathInit(INF, minYear, i, NULL);
@@ -351,12 +354,6 @@ List *bestPath(Graph *graph, int v1, int v2)
                 else if (compare(&path1, &secondPath[other]) >= 0)
                     secondPath[other] = path1;
 
-//                if (compare(&path2, &bestPath[other]) >= 0)
-//                {
-//                    secondPath[other] = bestPath[other];
-//                    bestPath[other] = path2;
-//                    priorityQueuePush(q, &bestPath[other]);
-//                }
                 if (compare(&path2, &secondPath[other]) >= 0)
                     secondPath[other] = path2;
 
@@ -364,7 +361,7 @@ List *bestPath(Graph *graph, int v1, int v2)
         }
     }
 
-    for(int i=0; i<graph->nodeCount; i++)
+    for(int i = 0; i < graph->nodeCount; i++)
     {
         Node *node = graph->nodes->tab[i];
         node->visited = false;
@@ -388,16 +385,6 @@ List *bestPath(Graph *graph, int v1, int v2)
         return NULL;
     }
 
-//    if(bestPath[v2].pathCount != 1 || bestPath[v2].parent == NULL)
-//    {
-//        deletePriorityQueue(q);
-//        for(int i=0; i<graph->nodeCount; i++)
-//            if(bestPath[i].parent != NULL && bestPath[i].parent->isInPath == false)
-//                free(bestPath[i].parent);
-//        free(bestPath);
-//        return NULL;
-//    }
-
     List *path = newList(NULL);
 
     while(bestPath[v2].parent != NULL)
@@ -406,10 +393,6 @@ List *bestPath(Graph *graph, int v1, int v2)
         bestPath[v2].parent->isInPath = true;
         v2 = bestPath[v2].parent->v;
     }
-
-//    for(int i=0; i<graph->nodeCount; i++)
-//        if(bestPath[i].parent != NULL && bestPath[i].parent->isInPath == false)
-//            free(bestPath[i].parent);
 
     foreach(it, orientedEdges)
     {
