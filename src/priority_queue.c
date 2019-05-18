@@ -6,7 +6,7 @@ PriorityQueue *newPriorityQueue(int(*cmp)(void *, void *))
 {
     unsigned int INITIAL_SIZE = 10;
 
-    PriorityQueue *queue = calloc(1, sizeof(PriorityQueue)); // TODO obsługa nieudanych calloców
+    PriorityQueue *queue = calloc(1, sizeof(PriorityQueue));
 
     if(queue == NULL)
         return NULL;
