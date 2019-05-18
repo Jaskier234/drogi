@@ -26,7 +26,7 @@ for(( i=1; i<$#; i++)); do
 	LEN=0
 
 	#echo "${ARGS[i]}"
-	if ! [[ "${ARGS[i]}" =~ ^[0-9]{1,3}$ ]]
+	if ! [[ "${ARGS[i]}" =~ ^([1-9]|[1-9][0-9]|[1-9][0-9][0-9])$ ]]
 	then
 		#echo "id spoza zakresu"
 		exit 1
