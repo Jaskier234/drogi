@@ -1,5 +1,5 @@
-/**
- * @file Interfejs generycznego wektora, przechowującego wskażniki
+/** @file
+ * Interfejs generycznego wektora, przechowującego wskażniki
  * na struktury dowolnego typu.
  */
 

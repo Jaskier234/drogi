@@ -4,7 +4,7 @@
  * Moduł alokuje większe fragmenty pamięci, które potem są rozdzielane
  * pomiędzy inne moduły. Struktura memory zawiera tablicę tablic. Każda
  * kolejna tablica jest dwukrotnie większa niż poprzednia. Gdy w aktualnej
- * tablicy skończy się pamięć alokowana jest następna.
+ * tablicy skończy się pamięć, alokowana jest następna.
  */
 
 #ifndef DROGI_MEMORY_H

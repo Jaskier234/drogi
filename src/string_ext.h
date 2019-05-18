@@ -1,5 +1,4 @@
-/**
- * @file
+/** @file
  * Interfejs modułu obsługującego operacje na napisach.
  */
 

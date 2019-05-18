@@ -102,12 +102,9 @@ static Change *newChange(Element *position, List *path)
     return change;
 }
 
-// Zwraca indeks miasta o podanej nazwie, a jeśli takie miasto nie istnieje to je tworzy.
-// Zwraca NULL, gdy nie udało się zaalokować pamięci.
-// Zakłada poprawność nazwy miasta.
 /**
  * Zwraca indeks miasta o podanej nazwie, a jeśli takie miasto nie istnieje
- * to je tworzy.
+ * to je tworzy. Nie sprawdza poprawności nazwy miasta
  * @param map Mapa, z której zostanie zwrócony indeks miasta lub zostanie
  * utworzone nowe miasto.
  * @param city nazwa miasta.
