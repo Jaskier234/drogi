@@ -589,7 +589,7 @@ char const* getRouteDescription(Map *map, unsigned routeId)
     int allocated = 16;
     char *description = calloc(allocated, sizeof(char));
 
-    if(routeId >= 1000 || map->routeList[routeId] == NULL) // droga nie istnieje
+    if(routeId >= 1000 || routeId == 0 || map->routeList[routeId] == NULL) // droga nie istnieje
         return description;
 
     char *routeNr = intToString(routeId);

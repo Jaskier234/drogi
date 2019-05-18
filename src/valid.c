@@ -109,11 +109,14 @@ int correct(char *input, Vector *args)
         if(args->filled != 2)
             return 0;
 
-        if(!correctInt(args->tab[1], MAX_ROUTE_ID, false))
+        if(!correctInt(args->tab[1], MAX_UINT64, false))
             return 0;
     }
     else if(correctInt(args->tab[0], MAX_ROUTE_ID, false))
     {
+        if(strcmp(args->tab[0], "0") == 0)
+            return 0;
+
         int it=1;
         while(it+2 < args->filled)
         {
@@ -170,8 +173,13 @@ bool correctInt(char *number, const char *maxNumber, bool isSigned)
     if(isSigned)
     {
         if(*number == '-')
+        {
             number++;
+        }
     }
+
+    if(strcmp(number, "0") == 0)
+        return true;
 
     // ignorujemy zera wiodące
     while(*number == '0')
