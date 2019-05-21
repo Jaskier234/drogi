@@ -513,10 +513,10 @@ bool removeRoad(Map *map, const char *city1, const char *city2)
                 {
                     foreach(elem, changes)
                     {
-                        Change *change = it->value;
+                        Change *change = elem->value;
                         deleteList(change->path, true);
 
-                        free(it->value);
+                        free(elem->value);
                     }
                     deleteList(changes, 0);
 
