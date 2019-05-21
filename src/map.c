@@ -187,7 +187,10 @@ bool repairRoad(Map *map, const char *city1 , const char *city2, int repairYear)
 
 bool newRoute(Map *map, unsigned routeId, const char *city1, const char *city2)
 {
-    if(routeId >= 1000 || map->routeList[routeId] != NULL) // istnieje już droga krajowa o podanym numerze
+    if(routeId <= 0 || routeId >= 1000) // zły numer drogi
+        return false;
+
+    if(map->routeList[routeId] != NULL) // istnieje już droga krajowa o podanym numerze
         return false;
 
     if(!isNameCorrect(city1) || !isNameCorrect(city2)) // niepoprawna nazwa miasta
@@ -370,7 +373,10 @@ static void setRouteVisited(Map *map, unsigned routeId)
 
 bool extendRoute(Map *map, unsigned routeId, const char *city)
 {
-    if(routeId >= 1000 || map->routeList[routeId] == NULL) // nie ma drogi krajowej o podanym id
+    if(routeId <= 0 || routeId >= 1000) // zły numer drogi
+        return false;
+
+    if(map->routeList[routeId] == NULL) // nie ma drogi krajowej o podanym id
         return false;
 
     if(!isNameCorrect(city))
@@ -439,7 +445,7 @@ bool extendRoute(Map *map, unsigned routeId, const char *city)
         return false;
     }
 
-    if(path1 == map->graph->ambiguous)
+    if(path2 == map->graph->ambiguous)
     {
         deleteList(path1, true); // path1 na pewno nie jest równe map->graph->ambiguous
         return false;
@@ -549,19 +555,14 @@ bool removeRoad(Map *map, const char *city1, const char *city2)
 
     free(removedEdge);
 
-    if(changes != NULL)
+    foreach(it, changes)
     {
-        Element *elem = changes->begin->next;
-        while(elem != changes->end)
-        {
-            Change *change = (Change*)elem->value;
-            free(change->positionOfChange->next->value);
-            listRemove(change->positionOfChange->next);
-            listInsertList(change->positionOfChange, change->path);
-            deleteList(change->path, false);
-            free(elem->value);
-            elem = elem->next;
-        }
+        Change *change = it->value;
+        free(change->positionOfChange->next->value);
+        listRemove(change->positionOfChange->next);
+        listInsertList(change->positionOfChange, change->path);
+        deleteList(change->path, false);
+        free(change);
     }
 
     deleteList(changes, false);
