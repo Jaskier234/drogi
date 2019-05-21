@@ -542,12 +542,13 @@ bool removeRoad(Map *map, const char *city1, const char *city2)
             Change *change = (Change*)elem->value;
             listRemove(change->positionOfChange->next);
             listInsertList(change->positionOfChange, change->path);
+            deleteList(change->path, false);
             free(elem->value);
             elem = elem->next;
         }
     }
 
-    deleteList(changes, 0);
+    deleteList(changes, false);
 
     return true;
 }

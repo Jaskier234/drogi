@@ -245,7 +245,7 @@ typedef struct Path
     int dist; ///< odległość wierzchołka od źródła.
     int year; ///< rok ostatniego remontu najstarszej drogi na ścieżce do źródła.
     int nodeId; ///< Id wierzchołka.
-    OrientedEdge *parent; ///< Krawędź sierowana, przez którą prowadzi najkrótsza.
+    OrientedEdge parent; ///< Krawędź sierowana, przez którą prowadzi najkrótsza.
     ///< ścieżka do źródła.
 } Path;
 
@@ -257,7 +257,7 @@ typedef struct Path
  * @param parent Krawędź sierowana, przez którą prowadzi najkrótsza.
  * @return Obiekt Path.
  */
-static Path pathInit(int dist, int year, int node, OrientedEdge *parent)
+static Path pathInit(int dist, int year, int node, OrientedEdge parent)
 {
     Path p;
     p.dist = dist;
@@ -290,11 +290,22 @@ static int compare(void *a, void *b)
     return ((path1->dist < path2->dist)?(1):(-1)); // 1 - path1 lepsza
 }
 
+static OrientedEdge initOrientedEdge(int v, Edge *edge)
+{
+    OrientedEdge oEdge;
+
+    oEdge.v = v;
+    oEdge.edge = edge;
+    oEdge.isInPath = false;
+
+    return oEdge;
+}
+
 List *bestPath(Graph *graph, int v1, int v2)
 {
     PriorityQueue *q = newPriorityQueue(compare);
 
-    List *orientedEdges = newList(NULL);
+//    List *orientedEdges = newList(NULL);
 
     Path *bestPath = calloc(graph->nodeCount, sizeof(Path));
     Path *secondPath = calloc(graph->nodeCount, sizeof(Path));
@@ -309,11 +320,11 @@ List *bestPath(Graph *graph, int v1, int v2)
 
     for(int i = 0; i < graph->nodeCount; i++)
     {
-          bestPath[i] = pathInit(INF, minYear, i, NULL);
-          secondPath[i] = pathInit(INF, minYear, i, NULL);
+          bestPath[i] = pathInit(INF, minYear, i, initOrientedEdge(-1, NULL));
+          secondPath[i] = pathInit(INF, minYear, i, initOrientedEdge(-1, NULL));
     }
 
-    bestPath[v1] = pathInit(0, maxYear, v1, NULL);
+    bestPath[v1] = pathInit(0, maxYear, v1, initOrientedEdge(-1, NULL));
 
     priorityQueuePush(q, &bestPath[v1]);
 
@@ -338,12 +349,12 @@ List *bestPath(Graph *graph, int v1, int v2)
             if (otherNode->visited == false)
             {
                 Path path1 = pathInit(bestPath[curr].dist + edge->length, min(bestPath[curr].year, edge->builtYear),
-                                      other, newOrientedEdge(edge, curr));
+                                      other, initOrientedEdge(curr, edge));
                 Path path2 = pathInit(secondPath[curr].dist + edge->length, min(secondPath[curr].year, edge->builtYear),
-                                      other, newOrientedEdge(edge, curr));
+                                      other, initOrientedEdge(curr, edge));
 
-                listPushBack(orientedEdges, path1.parent, NULL);
-                listPushBack(orientedEdges, path2.parent, NULL);
+//                listPushBack(orientedEdges, path1.parent, NULL);
+//                listPushBack(orientedEdges, path2.parent, NULL);
 
                 if (compare(&path1, &bestPath[other]) >= 0)
                 {
@@ -361,6 +372,7 @@ List *bestPath(Graph *graph, int v1, int v2)
         }
     }
 
+    // Ustawienie visited z powrotem na false
     for(int i = 0; i < graph->nodeCount; i++)
     {
         Node *node = graph->nodes->tab[i];
@@ -369,38 +381,40 @@ List *bestPath(Graph *graph, int v1, int v2)
 
     deletePriorityQueue(q);
 
+    // Niejednoznaczna ścieżka
     if(secondPath[v2].dist == bestPath[v2].dist && secondPath[v2].year == bestPath[v2].year && bestPath[v2].dist != INF)
     {
         free(bestPath);
         free(secondPath);
-        deleteList(orientedEdges, true);
+//        deleteList(orientedEdges, true);
         return graph->ambiguous;
     }
 
-    if(bestPath[v2].parent == NULL) // brak ścieżki
+    // brak ścieżki
+    if(bestPath[v2].parent.edge == NULL)
     {
         free(bestPath);
         free(secondPath);
-        deleteList(orientedEdges, true);
+//        deleteList(orientedEdges, true);
         return NULL;
     }
 
     List *path = newList(NULL);
 
-    while(bestPath[v2].parent != NULL)
+    while(bestPath[v2].parent.edge != NULL)
     {
-        listInsert(path->begin, bestPath[v2].parent, NULL);
-        bestPath[v2].parent->isInPath = true;
-        v2 = bestPath[v2].parent->v;
+        listInsert(path->begin, newOrientedEdge(bestPath[v2].parent.edge, bestPath[v2].parent.v), NULL);
+        bestPath[v2].parent.isInPath = true;
+        v2 = bestPath[v2].parent.v;
     }
 
-    foreach(it, orientedEdges)
-    {
-        OrientedEdge *edge = it->value;
-        if(edge != NULL && edge->isInPath == false)
-            free(edge);
-    }
-    deleteList(orientedEdges, false);
+//    foreach(it, orientedEdges)
+//    {
+//        OrientedEdge *edge = it->value;
+//        if(edge != NULL && edge->isInPath == false)
+//            free(edge);
+//    }
+//    deleteList(orientedEdges, false);
 
     free(bestPath);
     free(secondPath);
