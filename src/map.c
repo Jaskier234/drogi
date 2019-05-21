@@ -429,11 +429,21 @@ bool extendRoute(Map *map, unsigned routeId, const char *city)
         }
     }
 
+    // TODO dodać klamry w poniższych if-elsach
+
     // Któraś ze ścieżek jest niejednoznaczna
     if(path1 == map->graph->ambiguous)
+    {
+        if(path2 != map->graph->ambiguous)
+            deleteList(path2, true);
         return false;
-    if(path2 == map->graph->ambiguous)
+    }
+
+    if(path1 == map->graph->ambiguous)
+    {
+        deleteList(path1, true); // path1 na pewno nie jest równe map->graph->ambiguous
         return false;
+    }
 
     if(path1 == NULL && path2 == NULL) // Nie udało się wyznaczyć żadnej ze ścieżek
         return false;
@@ -444,7 +454,12 @@ bool extendRoute(Map *map, unsigned routeId, const char *city)
         listInsertList(map->routeList[routeId]->end->prev, path2);
     // Wyznaczono obie ścieżki, ale są niejednoznaczne
     else if( pathLength1 == pathLength2 && pathYear1 == pathYear2 )
+    {
+        deleteList(path1, true);
+        deleteList(path2, true);
         return false;
+    }
+
     // Wyznaczono obie ścieżki. Wybieramy lepszą.
     else if(pathLength1 < pathLength2 || (pathLength1 == pathLength2 && pathYear1 > pathLength2))
         listInsertList(map->routeList[routeId]->begin, path1);
@@ -540,6 +555,7 @@ bool removeRoad(Map *map, const char *city1, const char *city2)
         while(elem != changes->end)
         {
             Change *change = (Change*)elem->value;
+            free(change->positionOfChange->next->value);
             listRemove(change->positionOfChange->next);
             listInsertList(change->positionOfChange, change->path);
             deleteList(change->path, false);
