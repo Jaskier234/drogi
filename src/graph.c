@@ -336,6 +336,8 @@ List *bestPath(Graph *graph, int v1, int v2)
     bestPath[v1] = pathInit(0, maxYear, v1, initOrientedEdge(-1, NULL));
 
     priorityQueuePush(q, newPath(bestPath[v1]));
+    Node *startNode = graph->nodes->tab[v1];
+    startNode->visited = false;
 
     while(!isEmpty(q))
     {
@@ -345,6 +347,9 @@ List *bestPath(Graph *graph, int v1, int v2)
         free(n);
 
         Node *currentNode = graph->nodes->tab[curr];
+
+        if(currentNode->visited == true)
+            continue;
 
         currentNode->visited = true;
 
