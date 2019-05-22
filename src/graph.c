@@ -391,14 +391,6 @@ List *bestPath(Graph *graph, int v1, int v2)
 
     deletePriorityQueue(q);
 
-    // Niejednoznaczna ścieżka
-    if(secondPath[v2].dist == bestPath[v2].dist && secondPath[v2].year == bestPath[v2].year && bestPath[v2].dist != INF)
-    {
-        free(bestPath);
-        free(secondPath);
-        return graph->ambiguous;
-    }
-
     // brak ścieżki
     if(bestPath[v2].parent.edge == NULL)
     {
@@ -408,6 +400,12 @@ List *bestPath(Graph *graph, int v1, int v2)
     }
 
     List *path = newList(NULL);
+
+    // Niejednoznaczna ścieżka
+    if(secondPath[v2].dist == bestPath[v2].dist && secondPath[v2].year == bestPath[v2].year && bestPath[v2].dist != INF)
+    {
+        path->begin->value = graph->ambiguous;
+    }
 
     while(bestPath[v2].parent.edge != NULL)
     {

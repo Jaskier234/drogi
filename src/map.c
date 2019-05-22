@@ -207,8 +207,12 @@ bool newRoute(Map *map, unsigned routeId, const char *city1, const char *city2)
 
     map->routeList[routeId] = bestPath(map->graph, *v1, *v2);
 
-    if(map->routeList[routeId] == map->graph->ambiguous)
+    if(map->routeList[routeId] != NULL && map->routeList[routeId]->begin->value == map->graph->ambiguous)
+    {
+        map->routeList[routeId]->begin->value = NULL;
+        deleteList(map->routeList[routeId], true);
         map->routeList[routeId] = NULL;
+    }
 
     if(map->routeList[routeId] == NULL)
         return false;
@@ -437,40 +441,74 @@ bool extendRoute(Map *map, unsigned routeId, const char *city)
 
     // TODO dodać klamry w poniższych if-elsach
 
-    // Któraś ze ścieżek jest niejednoznaczna
-    if(path1 == map->graph->ambiguous)
-    {
-        if(path2 != map->graph->ambiguous)
-            deleteList(path2, true);
-        return false;
-    }
+//    List *betterPath;
 
-    if(path2 == map->graph->ambiguous)
-    {
-        deleteList(path1, true); // path1 na pewno nie jest równe map->graph->ambiguous
-        return false;
-    }
 
     if(path1 == NULL && path2 == NULL) // Nie udało się wyznaczyć żadnej ze ścieżek
         return false;
 
     if(path2 == NULL) // Wyznaczono jedną ze ścieżek
+    {
+        if(path1->begin->value == map->graph->ambiguous)
+        {
+            path1->begin->value = NULL;
+            deleteList(path1, true);
+            deleteList(path2, true);
+            return false;
+        }
         listInsertList(map->routeList[routeId]->begin, path1);
+    }
     else if(path1 == NULL)
+    {
+        if(path2->begin->value == map->graph->ambiguous)
+        {
+            deleteList(path1, true);
+            path2->begin->value = NULL;
+            deleteList(path2, true);
+            return false;
+        }
         listInsertList(map->routeList[routeId]->end->prev, path2);
+    }
     // Wyznaczono obie ścieżki, ale są niejednoznaczne
     else if( pathLength1 == pathLength2 && pathYear1 == pathYear2 )
     {
+        path1->begin->value = NULL;
         deleteList(path1, true);
+        path2->begin->value = NULL;
         deleteList(path2, true);
         return false;
     }
-
     // Wyznaczono obie ścieżki. Wybieramy lepszą.
-    else if(pathLength1 < pathLength2 || (pathLength1 == pathLength2 && pathYear1 > pathLength2))
+    else if(pathLength1 < pathLength2 || (pathLength1 == pathLength2 && pathYear1 > pathYear2))
+    {
+        if(path1->begin->value == map->graph->ambiguous)
+        {
+            path1->begin->value = NULL;
+            deleteList(path1, true);
+            path2->begin->value = NULL;
+            deleteList(path2, true);
+            return false;
+        }
         listInsertList(map->routeList[routeId]->begin, path1);
+    }
     else
+    {
+        if(path2->begin->value == map->graph->ambiguous)
+        {
+            path1->begin->value = NULL;
+            deleteList(path1, true);
+            path2->begin->value = NULL;
+            deleteList(path2, true);
+            return false;
+        }
         listInsertList(map->routeList[routeId]->end->prev, path2);
+    }
+
+    if(path1 != NULL)
+        path1->begin->value = NULL;
+
+    if(path2 != NULL)
+        path2->begin->value = NULL;
 
     deleteList(path1, true);
     deleteList(path2, true);
@@ -523,8 +561,12 @@ bool removeRoad(Map *map, const char *city1, const char *city2)
 
                 List *path = bestPath(map->graph, road->v, otherCityId);
 
-                if(path == map->graph->ambiguous)
+                if(path != NULL && path->begin->value == map->graph->ambiguous)
+                {
+                    path->begin->value = NULL;
+                    deleteList(path, true);
                     path = NULL;
+                }
 
                 if(path != NULL) // dodajemy do Change
                 {

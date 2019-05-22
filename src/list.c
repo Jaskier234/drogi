@@ -35,7 +35,6 @@ List *newList(Memory *memory)
     beginElem->next = endElem;
     endElem->prev = beginElem;
 
-
     list->begin = beginElem;
     list->end = endElem;
 
