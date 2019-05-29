@@ -220,6 +220,17 @@ bool newRoute(Map *map, unsigned routeId, const char *city1, const char *city2)
     return true;
 }
 
+bool removeRoute(Map *map, unsigned routeId)
+{
+    if(map->routeList[routeId] == NULL) // droga nie istnieje
+        return false;
+
+    deleteList(map->routeList[routeId]);
+    map->routeList->[routeId] = NULL;
+
+    return true;
+}
+
 /**
  * Zwraca id ostatniego miasta na drodze krajowej.
  * @param map Wskaźnik na mapę, w której jest droga, której ostatni wierzchołek
