@@ -41,6 +41,26 @@ int main()
 
             free((char*)description);
         }
+        else if(strcmp(command->tab[0], NEW_ROUTE) == 0)
+        {
+            if(!newRoute(map, stringToNum(command->tab[1]), command->tab[2], command->tab[3]))
+                fprintf(stderr, "%s %d\n", ERROR, lineNr);
+        }
+        else if(strcmp(command->tab[0], EXTEND_ROUTE) == 0)
+        {
+            if(!extendRoute(map, stringToNum(command->tab[1]), command->tab[2]))
+                fprintf(stderr, "%s %d\n", ERROR, lineNr);
+        }
+        else if(strcmp(command->tab[0], REMOVE_ROAD) == 0)
+        {
+            if(!removeRoad(map, command->tab[1], command->tab[2]))
+                fprintf(stderr, "%s %d\n", ERROR, lineNr);
+        }
+        else if(strcmp(command->tab[0], REMOVE_ROUTE) == 0)
+        {
+            if(!removeRoute(map, stringToNum(command->tab[1])))
+                fprintf(stderr, "%s %d\n", ERROR, lineNr);
+        }
         else
         {
             if(!addRoute(map, command))

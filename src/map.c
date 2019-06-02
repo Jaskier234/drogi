@@ -222,6 +222,9 @@ bool newRoute(Map *map, unsigned routeId, const char *city1, const char *city2)
 
 bool removeRoute(Map *map, unsigned routeId)
 {
+    if(routeId <= 0 || routeId >= 1000)
+        return false;
+
     if(map->routeList[routeId] == NULL) // droga nie istnieje
         return false;
 
