@@ -10,6 +10,10 @@
 const char *ADD_ROAD; ///< stała używana do parsowania wejścia.
 const char *REPAIR_ROAD; ///< stała używana do parsowania wejścia.
 const char *GET_ROUTE_DESRIPTION; ///< stała używana do parsowania wejścia.
+const char *NEW_ROUTE; ///< stała używana do parsowania wejścia.
+const char *EXTEND_ROUTE; ///< stała używana do parsowania wejścia.
+const char *REMOVE_ROAD; ///< stała używana do parsowania wejścia.
+const char *REMOVE_ROUTE; ///< stała używana do parsowania wejścia.
 const char *ERROR; ///< stała używana do parsowania wejścia.
 
 /**

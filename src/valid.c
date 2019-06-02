@@ -14,6 +14,10 @@ const char *MAX_ROUTE_ID = "999";
 const char *ADD_ROAD = "addRoad";
 const char *REPAIR_ROAD = "repairRoad";
 const char *GET_ROUTE_DESRIPTION = "getRouteDescription";
+const char *NEW_ROUTE = "newRoute";
+const char *EXTEND_ROUTE = "extendRoute";
+const char *REMOVE_ROAD = "removeRoad";
+const char *REMOVE_ROUTE = "removeRoute";
 const char *ERROR = "ERROR";
 
 /**
@@ -120,6 +124,44 @@ int correct(char *input, Vector *args)
         if(!correctInt(args->tab[1], MAX_UINT64, false))
             return 0;
     }
+    else if(strcmp(args->tab[0], NEW_ROUTE) == 0)
+    {
+        if(args->filled != 4) // niepoprawna liczba argumentów
+            return 0;
+
+        if(!correctInt(args->tab[1], MAX_ROUTE_ID, false))
+            return 0;
+
+        if(!isNameCorrect(args->tab[2]) || !isNameCorrect(args->tab[3]))
+            return 0;
+    }
+    else if(strcmp(args->tab[0], EXTEND_ROUTE) == 0)
+    {
+        if(args->filled != 3) // niepoprawna liczba argumentów
+            return 0;
+
+        if(!correctInt(args->tab[1], MAX_ROUTE_ID, false)) // niepoprawne id drogi
+            return 0;
+
+        if(!isNameCorrect(args->tab[2]))
+            return 0;
+    }
+    else if(strcmp(args->tab[0], REMOVE_ROAD) == 0)
+    {
+        if(args->filled != 3)
+            return 0;
+
+        if(!isNameCorrect(args->tab[1]) || !isNameCorrect(args->tab[2]))
+            return 0;
+    }
+    else if(strcmp(args->tab[0], REMOVE_ROUTE) == 0)
+    {
+        if(args->filled != 2)
+            return 0;
+
+        if(!correctInt(args->tab[1], MAX_ROUTE_ID, false))
+            return 0;
+    }
     else if(correctInt(args->tab[0], MAX_ROUTE_ID, false))
     {
         if(strcmp(args->tab[0], "0") == 0)
@@ -149,7 +191,8 @@ int correct(char *input, Vector *args)
         if(args->filled != it+1)
             return 0;
 
-        if(!isNameCorrect(args->tab[it])) {
+        if(!isNameCorrect(args->tab[it]))
+        {
             return 0;
         }
     }

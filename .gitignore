@@ -12,3 +12,4 @@ map_main_*
 tests.c
 rle/*
 repo/*
+cases*
