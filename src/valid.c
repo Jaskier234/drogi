@@ -256,6 +256,8 @@ bool correctInt(char *number, const char *maxNumber, bool isSigned)
     {
         if(number[i] > maxNumber[i])
             return false;
+        if(number[i] < maxNumber[i])
+            return true;
     }
 
 

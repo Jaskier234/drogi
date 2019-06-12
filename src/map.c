@@ -228,8 +228,8 @@ bool removeRoute(Map *map, unsigned routeId)
     if(map->routeList[routeId] == NULL) // droga nie istnieje
         return false;
 
-    deleteList(map->routeList[routeId]);
-    map->routeList->[routeId] = NULL;
+    deleteList(map->routeList[routeId], true);
+    map->routeList[routeId] = NULL;
 
     return true;
 }
